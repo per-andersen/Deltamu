@@ -32,13 +32,20 @@ def chi2(m, redshifts, distmod, redshifts_marg, distmod_lcdm_marg, sigma_marg):
 	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_lcdm_marg )**2 / sigma_marg**2 )
 
 def write_deltamu(cosmology_string, parameter_sets, length_loop):
-	#First we preaalocate some memory
+	
+	#First we preallocate some memory
 	distmod = np.zeros((len(redshifts),length_loop))
 	deltamu = np.zeros((len(redshifts),length_loop))
 	marg = np.zeros(length_loop)
-	
 	if do_marg:
 		sigma_marg = np.ones(len(redshifts_marg)) * 0.1
+
+    #For each parameter set, we define a cosmology and calculate distance moduli.
+    #These are then used to calculate deltamu, and if marginalising is chosen
+    #the magninalisation constants are calculated and stored.
+
+    #Need to get the max/min deltamu values for each redshift, and parameter set
+    #that gave that value
 
 	for ii in np.arange(length_loop):
 		exec(cosmology_string)
@@ -53,6 +60,27 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop):
 			#plt.plot(redshifts,(distmod[:,ii] + m_marg) / distmod_bestfit_lcdm,'b')
 			#plt.plot(redshifts,(distmod[:,ii]) / distmod_bestfit_lcdm,'g')
 			#plt.show()
+	print np.shape(parameter_sets)
+	print len(np.shape(parameter_sets))
+	if len(np.shape(parameter_sets)) == 2:
+		for jj in np.arange(len(redshifts)):
+			param_max = np.array([ parameter_sets[0][np.argmax(deltamu[jj,:])], parameter_sets[1][np.argmax(deltamu[jj,:])], parameter_sets[2][np.argmax(deltamu[jj,:])] ])
+			param_min = np.array([ parameter_sets[0][np.argmin(deltamu[jj,:])], parameter_sets[1][np.argmin(deltamu[jj,:])], parameter_sets[2][np.argmin(deltamu[jj,:])] ])
+			print np.shape(deltamu[jj,:]), np.max(deltamu[jj,:]), np.min(deltamu[jj,:]), np.argmax(deltamu[jj,:]), np.argmin(deltamu[jj,:])
+			print param_max
+			print param_min
+			print ""
+	else:
+		for jj in np.arange(len(redshifts)):
+			print np.shape(deltamu[jj,:]), np.max(deltamu[jj,:]), np.min(deltamu[jj,:]), np.argmax(deltamu[jj,:]), np.argmin(deltamu[jj,:]), parameter_sets[np.argmax(deltamu[jj,:])], parameter_sets[np.argmin(deltamu[jj,:])]
+			param_max = np.array([parameter_sets[np.argmax(deltamu[jj,:])]])
+			param_min = np.array([parameter_sets[np.argmin(deltamu[jj,:])]])
+			print param_max, param_min
+
+
+	#ToDo:
+	#----Write the above redshifts, min/max deltamu values, min/max parameters to pickle file
+	#----Do the same process for marginalised deltamu values, and store those in a pickle file as well
 		
 
 #Set contours we need and check that they exist
@@ -90,11 +118,11 @@ print "Done!"
 omega_m_lcdm_bestfit, hubble_const = 0.31, 70.
 
 #Decide if we want to do marginalization run too (time consuming)
-do_marg = True
+do_marg = False
 
 #Define redshift range
 #(Needs to be dense enough to get fine detail at lower redshifts)
-redshifts = np.linspace(0.001, 10, 1000)
+redshifts = np.linspace(0.001, 10, 100)
 
 #Create redshift range to marginalise with, need to experiment with this
 if do_marg:
@@ -118,8 +146,12 @@ cpl_cosmo_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=cpl_paramet
 jbp_cosmo_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=jbp_parameter_sets[0][ii], w0=jbp_parameter_sets[1][ii], wa=jbp_parameter_sets[2][ii])'
 
 write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets))
-write_deltamu(cpl_cosmo_string, cpl_parameter_sets, np.shape(cpl_parameter_sets)[1])
-write_deltamu(jbp_cosmo_string, jbp_parameter_sets, np.shape(jbp_parameter_sets)[1])
+#write_deltamu(cpl_cosmo_string, cpl_parameter_sets, np.shape(cpl_parameter_sets)[1])
+#write_deltamu(jbp_cosmo_string, jbp_parameter_sets, np.shape(jbp_parameter_sets)[1])
+print ""
+write_deltamu(cpl_cosmo_string, cpl_parameter_sets, 20)
+print ""
+write_deltamu(jbp_cosmo_string, jbp_parameter_sets, 20)
 
 print "Function end in:", ti.time() - t0, "seconds"
 
