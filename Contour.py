@@ -28,7 +28,6 @@ class Contour(object):
         
         H = H.ravel() # Returns a flattened array
         
-        
         i_sort = np.argsort(H)[::-1] # Returns indices sorting H from largest to smallest
         i_unsort = np.argsort(i_sort)# Returns indices undoing sort above
         

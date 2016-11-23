@@ -167,13 +167,24 @@ cpl_cosmo_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=cpl_paramet
 jbp_cosmo_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=jbp_parameter_sets[0][ii], w0=jbp_parameter_sets[1][ii], wa=jbp_parameter_sets[2][ii])'
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
-write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets), root_dir + 'lcdm.pkl')
+lcdm_fname = "deltamu_lcdm_c" + str(lcdm_contour_level) +\
+"_t" + str(lcdm_tolerance) + "_b" + str(lcdm_bins_tuple) + ".dat"
+
+cpl_fname = "deltamu_cpl_c" + str(cpl_contour_level) +\
+"_t" + str(cpl_tolerance) + "_b" + str(cpl_bins_tuple[0]) + \
+str(cpl_bins_tuple[1]) + str(cpl_bins_tuple[2]) + ".dat"
+
+jbp_fname = "deltamu_jbp_c" + str(jbp_contour_level) +\
+"_t" + str(jbp_tolerance) + "_b" + str(jbp_bins_tuple[0]) + \
+str(jbp_bins_tuple[1]) + str(jbp_bins_tuple[2]) + ".dat"
+
+write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets), root_dir + lcdm_fname)
 #write_deltamu(cpl_cosmo_string, cpl_parameter_sets, np.shape(cpl_parameter_sets)[1])
 #write_deltamu(jbp_cosmo_string, jbp_parameter_sets, np.shape(jbp_parameter_sets)[1])
 print ""
-write_deltamu(cpl_cosmo_string, cpl_parameter_sets, 20, root_dir + 'cpl.pkl')
+write_deltamu(cpl_cosmo_string, cpl_parameter_sets, 20, root_dir + cpl_fname)
 print ""
-write_deltamu(jbp_cosmo_string, jbp_parameter_sets, 20, root_dir + 'jbp.pkl')
+write_deltamu(jbp_cosmo_string, jbp_parameter_sets, 20, root_dir + jbp_fname)
 
 print "Function end in:", ti.time() - t0, "seconds"
 
