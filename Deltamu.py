@@ -83,13 +83,13 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 			deltamu_min[jj] = np.min(deltamu[jj,:])
 			param_max = np.array([parameter_sets[np.argmax(deltamu[jj,:])]])
 			param_min = np.array([parameter_sets[np.argmin(deltamu[jj,:])]])
-		parameters_max[jj] = param_max
-		parameters_min[jj] = param_min
+			parameters_max[jj] = param_max
+			parameters_min[jj] = param_min
     
 	print np.shape(parameters_max)
 	print np.shape(parameters_min)
 	
-	data_dump = (redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max)
+	data_dump = redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
 	data_file_name = f_name
 	output = open(data_file_name,'wb')
 	pick.dump(data_dump,output)
@@ -143,7 +143,7 @@ do_marg = False
 
 #Define redshift range
 #(Needs to be dense enough to get fine detail at lower redshifts)
-redshifts = np.linspace(0.001, 10, 1000)
+redshifts = np.linspace(0.001, 10, 100)
 
 #Create redshift range to marginalise with, need to experiment with this
 if do_marg:
