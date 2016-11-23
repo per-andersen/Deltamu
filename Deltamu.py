@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
+import pickle as pick
 import astropy.cosmology as cosmo
 import CosmoMC_dao
 import Contour
@@ -31,12 +32,15 @@ def lin_interp_array(X,Y,X_interp):
 def chi2(m, redshifts, distmod, redshifts_marg, distmod_lcdm_marg, sigma_marg):
 	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_lcdm_marg )**2 / sigma_marg**2 )
 
-def write_deltamu(cosmology_string, parameter_sets, length_loop):
+def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 	
 	#First we preallocate some memory
 	distmod = np.zeros((len(redshifts),length_loop))
 	deltamu = np.zeros((len(redshifts),length_loop))
 	marg = np.zeros(length_loop)
+	deltamu_max = np.zeros(len(redshifts))
+	deltamu_min = np.zeros(len(redshifts))
+
 	if do_marg:
 		sigma_marg = np.ones(len(redshifts_marg)) * 0.1
 
@@ -60,23 +64,36 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop):
 			#plt.plot(redshifts,(distmod[:,ii] + m_marg) / distmod_bestfit_lcdm,'b')
 			#plt.plot(redshifts,(distmod[:,ii]) / distmod_bestfit_lcdm,'g')
 			#plt.show()
-	print np.shape(parameter_sets)
-	print len(np.shape(parameter_sets))
+    
 	if len(np.shape(parameter_sets)) == 2:
+		parameters_max = np.zeros((len(redshifts),3))
+		parameters_min = np.zeros((len(redshifts),3))
 		for jj in np.arange(len(redshifts)):
+			deltamu_max[jj] = np.max(deltamu[jj,:])
+			deltamu_min[jj] = np.min(deltamu[jj,:])
 			param_max = np.array([ parameter_sets[0][np.argmax(deltamu[jj,:])], parameter_sets[1][np.argmax(deltamu[jj,:])], parameter_sets[2][np.argmax(deltamu[jj,:])] ])
 			param_min = np.array([ parameter_sets[0][np.argmin(deltamu[jj,:])], parameter_sets[1][np.argmin(deltamu[jj,:])], parameter_sets[2][np.argmin(deltamu[jj,:])] ])
-			print np.shape(deltamu[jj,:]), np.max(deltamu[jj,:]), np.min(deltamu[jj,:]), np.argmax(deltamu[jj,:]), np.argmin(deltamu[jj,:])
-			print param_max
-			print param_min
-			print ""
+			parameters_max[jj,:] = param_max
+			parameters_min[jj,:] = param_min
 	else:
+		parameters_max = np.zeros(len(redshifts))
+		parameters_min = np.zeros(len(redshifts))
 		for jj in np.arange(len(redshifts)):
-			print np.shape(deltamu[jj,:]), np.max(deltamu[jj,:]), np.min(deltamu[jj,:]), np.argmax(deltamu[jj,:]), np.argmin(deltamu[jj,:]), parameter_sets[np.argmax(deltamu[jj,:])], parameter_sets[np.argmin(deltamu[jj,:])]
+			deltamu_max[jj] = np.max(deltamu[jj,:])
+			deltamu_min[jj] = np.min(deltamu[jj,:])
 			param_max = np.array([parameter_sets[np.argmax(deltamu[jj,:])]])
 			param_min = np.array([parameter_sets[np.argmin(deltamu[jj,:])]])
-			print param_max, param_min
-
+		parameters_max[jj] = param_max
+		parameters_min[jj] = param_min
+    
+	print np.shape(parameters_max)
+	print np.shape(parameters_min)
+	
+	data_dump = (redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max)
+	data_file_name = f_name
+	output = open(data_file_name,'wb')
+	pick.dump(data_dump,output)
+	output.close()
 
 	#ToDo:
 	#----Write the above redshifts, min/max deltamu values, min/max parameters to pickle file
@@ -109,9 +126,13 @@ else:
 
 #Read in contours
 print "Reading in contours...",
-lcdm_parameter_sets = LCDM_Contour.read_pickled_contour()
-cpl_parameter_sets = CPL_Contour.read_pickled_contour()
-jbp_parameter_sets = JBP_Contour.read_pickled_contour()
+lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple = LCDM_Contour.read_pickled_contour()
+
+cpl_omega_contour, cpl_w0_contour, cpl_wa_contour, cpl_contour_level, cpl_tolerance, cpl_bins_tuple = CPL_Contour.read_pickled_contour()
+cpl_parameter_sets = cpl_omega_contour, cpl_w0_contour, cpl_wa_contour
+
+jbp_omega_contour, jbp_w0_contour, jbp_wa_contour, jbp_contour_level, jbp_tolerance, jbp_bins_tuple = JBP_Contour.read_pickled_contour()
+jbp_parameter_sets = jbp_omega_contour, jbp_w0_contour, jbp_wa_contour
 print "Done!"
 
 #Define the best fit LCDM parameter
@@ -122,7 +143,7 @@ do_marg = False
 
 #Define redshift range
 #(Needs to be dense enough to get fine detail at lower redshifts)
-redshifts = np.linspace(0.001, 10, 100)
+redshifts = np.linspace(0.001, 10, 1000)
 
 #Create redshift range to marginalise with, need to experiment with this
 if do_marg:
@@ -145,13 +166,14 @@ lcdm_cosmo_string = 'cosmology=cosmo.FlatLambdaCDM(H0=hubble_const, Om0=lcdm_par
 cpl_cosmo_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=cpl_parameter_sets[0][ii], w0=cpl_parameter_sets[1][ii], wa=cpl_parameter_sets[2][ii])'
 jbp_cosmo_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=jbp_parameter_sets[0][ii], w0=jbp_parameter_sets[1][ii], wa=jbp_parameter_sets[2][ii])'
 
-write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets))
+root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
+write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets), root_dir + 'lcdm.pkl')
 #write_deltamu(cpl_cosmo_string, cpl_parameter_sets, np.shape(cpl_parameter_sets)[1])
 #write_deltamu(jbp_cosmo_string, jbp_parameter_sets, np.shape(jbp_parameter_sets)[1])
 print ""
-write_deltamu(cpl_cosmo_string, cpl_parameter_sets, 20)
+write_deltamu(cpl_cosmo_string, cpl_parameter_sets, 20, root_dir + 'cpl.pkl')
 print ""
-write_deltamu(jbp_cosmo_string, jbp_parameter_sets, 20)
+write_deltamu(jbp_cosmo_string, jbp_parameter_sets, 20, root_dir + 'jbp.pkl')
 
 print "Function end in:", ti.time() - t0, "seconds"
 

@@ -68,7 +68,7 @@ class Contour(object):
     def pickle_contour(self):
         x_contour, y_contour, z_contour = self.histogram_to_contours()
         
-        output = x_contour, y_contour, z_contour
+        output = x_contour, y_contour, z_contour, self.contour_level, self.tolerance, self.bins_tuple
         
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
         "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
@@ -188,15 +188,13 @@ class LCDM_Contour(Contour):
         
         idx = np.where(np.abs(sigma) < self.contour_level)
         x_contour = xbins[idx]
-        #print xbins
-        print x_contour
 
         return x_contour
 
     def pickle_contour(self):
         x_contour = self.histogram_to_contours()
         
-        output = x_contour
+        output = x_contour, self.contour_level, self.tolerance, self.bins_tuple
         
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
         "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + ".dat"
@@ -230,19 +228,19 @@ class LCDM_Contour(Contour):
 
 
 if __name__ == "__main__":
-    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/')
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/')
     #CPL_Contour.test_contour_exists()
-    #CPL_Contour.pickle_contour()
+    CPL_Contour.pickle_contour()
     #CPL_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #CPL_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
-    #JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
+    JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
     #JBP_Contour.test_contour_exists()
-    #JBP_Contour.pickle_contour()
+    JBP_Contour.pickle_contour()
     #JBP_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #JBP_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
     LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
     LCDM_Contour.pickle_contour()
-    print LCDM_Contour.test_contour_exists()
-    LCDM_Contour.plot_contour()
+    #print LCDM_Contour.test_contour_exists()
+    #LCDM_Contour.plot_contour()
