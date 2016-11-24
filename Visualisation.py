@@ -46,6 +46,14 @@ def get_unique_parameter_sets(fname):
         unique_par_sets_min = unique_par_sets_3d(parameters_min)
         unique_par_sets_max = unique_par_sets_3d(parameters_max)
 
+def plot_minmax_deltamu(fname, title):
+    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
+    plt.figure()
+    plt.plot(redshifts, deltamu_min,'b')
+    plt.plot(redshifts, deltamu_max,'b')
+    plt.title(title)
+
+
 
 
 
@@ -69,5 +77,9 @@ jbp_fname = "deltamu_jbp_c" + str(jbp_contour_level) +\
 "_t" + str(jbp_tolerance) + "_b" + str(jbp_bins_tuple[0]) + \
 str(jbp_bins_tuple[1]) + str(jbp_bins_tuple[2]) + ".dat"
 
-get_unique_parameter_sets(root_dir + lcdm_fname)
-get_unique_parameter_sets(root_dir + cpl_fname)
+#get_unique_parameter_sets(root_dir + lcdm_fname)
+#get_unique_parameter_sets(root_dir + cpl_fname)
+plot_minmax_deltamu(root_dir + lcdm_fname, 'lcdm')
+plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
+plot_minmax_deltamu(root_dir + jbp_fname, 'jbp')
+plt.show()
