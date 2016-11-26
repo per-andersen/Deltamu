@@ -68,17 +68,15 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 	deltamu = np.zeros((len(redshifts),length_loop))
 	marg = np.zeros(length_loop)
 
-	if do_marg:
-		sigma_marg = np.ones(len(redshifts_marg)) * 0.1
-
     #For each parameter set, we define a cosmology and calculate distance moduli.
     #These are then used to calculate deltamu, and if marginalising is chosen
     #the magninalisation constants are calculated and stored.
 
     #Need to get the max/min deltamu values for each redshift, and parameter set
     #that gave that value
-
+	print "Calculating deltamu values..."
 	for ii in np.arange(length_loop):
+		#print ii
 		exec(cosmology_string)
 		distmod[:,ii] = cosmology.distmod(redshifts)
 		deltamu[:,ii] = distmod[:,ii] - np.array(distmod_bestfit_lcdm)
@@ -87,8 +85,12 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 			m_marg = opt.fmin(chi2,x0=0.,args=(redshifts, distmod[:,ii], redshifts_marg, distmod_lcdm_marg, sigma_marg),xtol=0.005,disp=0)
 			marg[ii] = m_marg
 
+	print deltamu[:,ii][:10]
+    
+	print "Getting min/max parameters and deltamus"
 	parameters_min, parameters_max, deltamu_min, deltamu_max = get_parameters_minmax(parameter_sets, deltamu)
-
+    
+	print "Dumping data to file"
 	data_dump = redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
 	data_file_name = f_name
 	output = open(data_file_name,'wb')
@@ -106,41 +108,52 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 	print np.shape(parameters_max)
 	print np.shape(parameters_min)
 		
+def define_redshifts_marg(zmin=0.1, zmax=10., nz=10, sigma=0.1):
+	redshifts_marg = np.linspace(zmin, zmax, nz)
+	sigma_marg = np.ones(len(redshifts_marg)) * sigma
+	return redshifts_marg, sigma_marg
 
-#Set contours we need and check that they exist
-LCDM_Contour = Contour.LCDM_Contour(chain_name='lcdm',directory='/Users/perandersen/Data/HzSC/')
-print "Does LCDM Contour exist?",
-if LCDM_Contour.test_contour_exists():
-	print "Yes"
-else:
-	print "No"
-	LCDM_Contour.pickle_contour()
+def define_contours(lcdm_contour_level = 0.68, lcdm_tolerance = 0.01, lcdm_bins_tuple=100,cpl_contour_level = 0.68, cpl_tolerance = 0.005, cpl_bins_tuple=(50,50,50),jbp_contour_level = 0.68, jbp_tolerance = 0.005, jbp_bins_tuple=(50,50,50)):
+	#Set contours we need and check that they exist
+	LCDM_Contour = Contour.LCDM_Contour(chain_name='lcdm',directory='/Users/perandersen/Data/HzSC/',contour_level=lcdm_contour_level,tolerance=lcdm_tolerance,bins_tuple=lcdm_bins_tuple)
+	print "Does LCDM Contour exist?",
+	if LCDM_Contour.test_contour_exists():
+		print "Yes"
+	else:
+		print "No"
+		LCDM_Contour.pickle_contour()
 
-CPL_Contour = Contour.Contour(chain_name='cpl',directory='/Users/perandersen/Data/HzSC/')
-print "Does CPL Contour exist?",
-if CPL_Contour.test_contour_exists():
-	print "Yes"
-else:
-	print "No"
-	CPL_Contour.pickle_contour()
-JBP_Contour = Contour.Contour(chain_name='jbp',directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
-print "Does JBP Contour exist?",
-if JBP_Contour.test_contour_exists():
-	print "Yes"
-else:
-	print "No"
-	JBP_Contour.pickle_contour()
+	CPL_Contour = Contour.Contour(chain_name='cpl',directory='/Users/perandersen/Data/HzSC/',contour_level=cpl_contour_level,tolerance=cpl_tolerance,bins_tuple=cpl_bins_tuple)
+	print "Does CPL Contour exist?",
+	if CPL_Contour.test_contour_exists():
+		print "Yes"
+	else:
+		print "No"
+		CPL_Contour.pickle_contour()
+	JBP_Contour = Contour.Contour(chain_name='jbp',directory='/Users/perandersen/Data/HzSC/',contour_level=jbp_contour_level,tolerance=jbp_tolerance,bins_tuple=jbp_bins_tuple)
+	print "Does JBP Contour exist?",
+	if JBP_Contour.test_contour_exists():
+		print "Yes"
+	else:
+		print "No"
+		JBP_Contour.pickle_contour()
 
-#Read in contours
-print "Reading in contours...",
-lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple = LCDM_Contour.read_pickled_contour()
+	#Read in contours
+	print "Reading in contours...",
+	lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple = LCDM_Contour.read_pickled_contour()
 
-cpl_omega_contour, cpl_w0_contour, cpl_wa_contour, cpl_contour_level, cpl_tolerance, cpl_bins_tuple = CPL_Contour.read_pickled_contour()
-cpl_parameter_sets = cpl_omega_contour, cpl_w0_contour, cpl_wa_contour
+	cpl_omega_contour, cpl_w0_contour, cpl_wa_contour, cpl_contour_level, cpl_tolerance, cpl_bins_tuple = CPL_Contour.read_pickled_contour()
+	cpl_parameter_sets = cpl_omega_contour, cpl_w0_contour, cpl_wa_contour
 
-jbp_omega_contour, jbp_w0_contour, jbp_wa_contour, jbp_contour_level, jbp_tolerance, jbp_bins_tuple = JBP_Contour.read_pickled_contour()
-jbp_parameter_sets = jbp_omega_contour, jbp_w0_contour, jbp_wa_contour
-print "Done!"
+	jbp_omega_contour, jbp_w0_contour, jbp_wa_contour, jbp_contour_level, jbp_tolerance, jbp_bins_tuple = JBP_Contour.read_pickled_contour()
+	jbp_parameter_sets = jbp_omega_contour, jbp_w0_contour, jbp_wa_contour
+	print "Done!"
+	return lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple, cpl_parameter_sets, cpl_contour_level, cpl_tolerance, cpl_bins_tuple, jbp_parameter_sets, jbp_contour_level, jbp_tolerance, jbp_bins_tuple
+
+
+lcdm_parameter_sets,lcdm_contour_level,lcdm_tolerance,lcdm_bins_tuple,cpl_parameter_sets,cpl_contour_level,cpl_tolerance,cpl_bins_tuple,jbp_parameter_sets,jbp_contour_level,jbp_tolerance,jbp_bins_tuple = define_contours(jbp_bins_tuple=(20,20,20))
+
+
 
 #Define the best fit LCDM parameter
 omega_m_lcdm_bestfit, hubble_const = 0.30754277645, 70.
@@ -154,8 +167,7 @@ redshifts = np.linspace(0.001, 10, 1000)
 
 #Create redshift range to marginalise with, need to experiment with this
 if do_marg:
-	redshifts_marg = np.linspace(0.1, 10, 11)
-	sigma_marg = np.ones(len(redshifts_marg)) * 0.1
+	redshifts_marg, sigma_marg = define_redshifts_marg()
 
 
 #Defining cosmology for best fitting parameters and derive distance moduli
