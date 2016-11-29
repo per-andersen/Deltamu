@@ -35,19 +35,31 @@ def chi2(m, redshifts, distmod, redshifts_marg, distmod_lcdm_marg, sigma_marg):
 class Deltamu(object):
 	"""A contour class for 3d contours
 	"""
-	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/', redshifts=np.linspace(0.001,10.,1000), redshifts_marg = np.linspace(0.1,10.,10), sigmas_marg = None, contour_level = 0.68, tolerance = 0.005, bins_tuple=(50,50,50), do_marg=False):
+	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
+		redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
+		tolerance = 0.005, bins_tuple=(50,50,50), do_marg=False, redshift_marg_min=0.1,\
+		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='lin'):
+
 		self.chain_name = chain_name
 		self.cosmology_string = cosmology_string
 		self.directory = directory
 		self.redshifts = redshifts
-		self.redshifts_marg = redshifts_marg
 		self.sigmas_marg = sigmas_marg
 		self.contour_level = contour_level
 		self.tolerance = tolerance
 		self.bins_tuple = bins_tuple
 		self.do_marg = do_marg
+		self.redshift_marg_min = redshift_marg_min
+		self.redshift_marg_max = redshift_marg_max
+		self.redshift_marg_n = redshift_marg_n
+		self.redshifts_marg_method = redshifts_marg_method
+
+		if redshifts_marg_method == 'lin':
+			self.redshifts_marg = np.linspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
+		elif redshifts_marg_method == 'log':
+			self.redshifts_marg = np.logspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
 		if self.sigmas_marg == None:
-			self.sigmas_marg = np.ones(len(redshifts_marg)) * 0.1
+			self.sigmas_marg = np.ones(redshift_marg_n) * 0.1
 
 
 		self.deltamu = self.get_deltamu()
@@ -69,7 +81,7 @@ class Deltamu(object):
 
 		print "Dumping data to file", f_name
 		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
-		data_file_name = self.directory + "/Deltamu/" + f_name
+		data_file_name = self.directory + "Deltamu/" + f_name
 		output = open(data_file_name,'wb')
 		pick.dump(data_dump,output)
 		output.close()
@@ -77,17 +89,21 @@ class Deltamu(object):
 		if self.do_marg:
 			if self.chain_name == 'lcdm':
 				f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
-				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + "_marg.dat"
+				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + "_marg_" +\
+				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
+				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
 			else:
 				f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
 				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
-				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg.dat"
+				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg_" +\
+				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
+				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
 
 			parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=self.marg)
 
 			print "Dumping data to file", f_name
 			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
-			data_file_name = self.directory + "/Deltamu/"+ f_name
+			data_file_name = self.directory + "Deltamu/"+ f_name
 			output = open(data_file_name,'wb')
 			pick.dump(data_dump,output)
 			output.close()
@@ -186,11 +202,11 @@ cpl_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=parameter_sets[0]
 jbp_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
 t0 = ti.time()
-Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
-Deltamu_lcdm.write_minmax_deltamuparameters()
+#Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
+#Deltamu_lcdm.write_minmax_deltamuparameters()
 
-#Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
-#Deltamu_cpl.write_minmax_deltamuparameters()
+Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
+Deltamu_cpl.write_minmax_deltamuparameters()
 
 #Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
 #Deltamu_jbp.write_minmax_deltamuparameters()
