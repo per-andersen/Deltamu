@@ -61,25 +61,35 @@ LCDM_Contour = Contour.LCDM_Contour(chain_name='lcdm',directory='/Users/perander
 CPL_Contour = Contour.Contour(chain_name='cpl',directory='/Users/perandersen/Data/HzSC/')
 JBP_Contour = Contour.Contour(chain_name='jbp',directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
 
-lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple = LCDM_Contour.read_pickled_contour()
-cpl_omega_contour, cpl_w0_contour, cpl_wa_contour, cpl_contour_level, cpl_tolerance, cpl_bins_tuple = CPL_Contour.read_pickled_contour()
-jbp_omega_contour, jbp_w0_contour, jbp_wa_contour, jbp_contour_level, jbp_tolerance, jbp_bins_tuple = JBP_Contour.read_pickled_contour()
+lcdm_parameter_sets = LCDM_Contour.read_pickled_contour()
+cpl_omega_contour, cpl_w0_contour, cpl_wa_contour = CPL_Contour.read_pickled_contour()
+#jbp_omega_contour, jbp_w0_contour, jbp_wa_contour = JBP_Contour.read_pickled_contour()
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
-lcdm_fname = "deltamu_lcdm_c" + str(lcdm_contour_level) +\
-"_t" + str(lcdm_tolerance) + "_b" + str(lcdm_bins_tuple) + ".dat"
 
-cpl_fname = "deltamu_cpl_c" + str(cpl_contour_level) +\
-"_t" + str(cpl_tolerance) + "_b" + str(cpl_bins_tuple[0]) + \
-str(cpl_bins_tuple[1]) + str(cpl_bins_tuple[2]) + ".dat"
+#lcdm_fname = "deltamu_lcdm_c" + str(lcdm_contour_level) +\
+#"_t" + str(lcdm_tolerance) + "_b" + str(lcdm_bins_tuple) + ".dat"
 
-jbp_fname = "deltamu_jbp_c" + str(jbp_contour_level) +\
-"_t" + str(jbp_tolerance) + "_b" + str(jbp_bins_tuple[0]) + \
-str(jbp_bins_tuple[1]) + str(jbp_bins_tuple[2]) + ".dat"
+#cpl_fname = "deltamu_cpl_c" + str(cpl_contour_level) +\
+#"_t" + str(cpl_tolerance) + "_b" + str(cpl_bins_tuple[0]) + \
+#str(cpl_bins_tuple[1]) + str(cpl_bins_tuple[2]) + ".dat"
+
+#jbp_fname = "deltamu_jbp_c" + str(jbp_contour_level) +\
+#"_t" + str(jbp_tolerance) + "_b" + str(jbp_bins_tuple[0]) + \
+#str(jbp_bins_tuple[1]) + str(jbp_bins_tuple[2]) + ".dat"
 
 #get_unique_parameter_sets(root_dir + lcdm_fname)
 #get_unique_parameter_sets(root_dir + cpl_fname)
-plot_minmax_deltamu(root_dir + lcdm_fname, 'lcdm')
-plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
-plot_minmax_deltamu(root_dir + jbp_fname, 'jbp')
+#plot_minmax_deltamu(root_dir + lcdm_fname, 'lcdm')
+#plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
+#plot_minmax_deltamu(root_dir + jbp_fname, 'jbp')
+
+plot_minmax_deltamu(root_dir + 'deltamu_lcdm_c0.68_t0.01_b100.dat', 'lcdm')
+plot_minmax_deltamu(root_dir + 'deltamu_lcdm_c0.68_t0.01_b100_marg.dat', 'lcdm')
+plot_minmax_deltamu(root_dir + 'deltamu_cpl_c0.68_t0.005_b505050.dat', 'cpl')
+plot_minmax_deltamu(root_dir + 'deltamu_cpl_c0.68_t0.005_b505050_marg.dat', 'cpl')
+plot_minmax_deltamu(root_dir + 'deltamu_jbp_c0.68_t0.005_b202020.dat', 'jbp')
+plot_minmax_deltamu(root_dir + 'deltamu_jbp_c0.68_t0.005_b202020_marg.dat', 'jbp')
+
 plt.show()
+

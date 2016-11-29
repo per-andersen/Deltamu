@@ -67,7 +67,7 @@ class Contour(object):
     def pickle_contour(self):
         x_contour, y_contour, z_contour = self.histogram_to_contours()
         
-        output = x_contour, y_contour, z_contour, self.contour_level, self.tolerance, self.bins_tuple
+        output = x_contour, y_contour, z_contour
         
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
         "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
@@ -193,7 +193,7 @@ class LCDM_Contour(Contour):
     def pickle_contour(self):
         x_contour = self.histogram_to_contours()
         
-        output = x_contour, self.contour_level, self.tolerance, self.bins_tuple
+        output = x_contour
         
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
         "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + ".dat"
