@@ -92,7 +92,7 @@ class Contour(object):
         return data
 
     def read_pickled_chains(self):
-        pkl_data_file = open(self.directory + "Chains/Pickle/" + self.chain_name + "_contours.pkl",'rb')
+        pkl_data_file = open(self.directory + "Chains/Pickle/" + self.chain_name + "_chains.pkl",'rb')
         data = pick.load(pkl_data_file)
         pkl_data_file.close()
         return data

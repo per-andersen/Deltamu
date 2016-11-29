@@ -17,7 +17,7 @@ class CosmoMC_dao(object):
         
         if len(param_names_file) != 1:
             print "Too many parameter name files!"
-            raise
+            raisej
         
         param_names_file = param_names_file[0]
 
@@ -102,8 +102,9 @@ class CosmoMC_dao(object):
             index_counter = 0
         return data_indices
 
-    def pickle_sliced_chains(self,indices=[],fname=""):
+    def pickle_sliced_chains(self,indices=[],fname="", burn=3000):
         data = self.get_parameter_chains(indices=indices)
+        data = data[burn:,:]
         data_labels = self.get_parameter_names(indices=indices)
         output = [data, data_labels]
         data_file_name = self.directory + "../Pickle/" + fname
@@ -163,9 +164,9 @@ if __name__ == "__main__":
     
 
     '''Below tests writing and reading data'''
-    #cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_contours.pkl')
-    #cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_contours.pkl')
-    cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_contours.pkl')
+    cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
+    cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
+    cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
     
     #data, data_labels = cosmomc_cpl.read_pickled_chains(fname='cpl_contours.pkl')
     #print cosmomc_cpl.get_parameter_names(indices=[31, 6, 7])

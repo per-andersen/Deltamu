@@ -202,11 +202,11 @@ cpl_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=parameter_sets[0]
 jbp_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
 t0 = ti.time()
-#Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
-#Deltamu_lcdm.write_minmax_deltamuparameters()
+Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
+Deltamu_lcdm.write_minmax_deltamuparameters()
 
-Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
-Deltamu_cpl.write_minmax_deltamuparameters()
+#Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
+#Deltamu_cpl.write_minmax_deltamuparameters()
 
 #Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
 #Deltamu_jbp.write_minmax_deltamuparameters()
