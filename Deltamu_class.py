@@ -205,11 +205,11 @@ t0 = ti.time()
 Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
 Deltamu_lcdm.write_minmax_deltamuparameters()
 
-#Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
-#Deltamu_cpl.write_minmax_deltamuparameters()
+Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
+Deltamu_cpl.write_minmax_deltamuparameters()
 
-#Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
-#Deltamu_jbp.write_minmax_deltamuparameters()
+Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
+Deltamu_jbp.write_minmax_deltamuparameters()
 print "Classes done in:", ti.time() - t0, "seconds"
 
 
