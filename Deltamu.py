@@ -104,9 +104,7 @@ def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
 		output = open(data_file_name,'wb')
 		pick.dump(data_dump,output)
 		output.close()
-
-	print np.shape(parameters_max)
-	print np.shape(parameters_min)
+	
 		
 def define_redshifts_marg(zmin=0.1, zmax=10., nz=10, sigma=0.1):
 	redshifts_marg = np.linspace(zmin, zmax, nz)

@@ -8,7 +8,7 @@ class Contour(object):
     """A contour class for 3d contours
     """
 
-    def __init__(self, chain_name, directory, contour_level = 0.68, tolerance = 0.005, bins_tuple=(50,50,50)):
+    def __init__(self, chain_name, directory, contour_level = 0.68, tolerance = 0.001, bins_tuple=(50,50,50)):
         self.chain_name = chain_name
         self.directory = directory
         self.contour_level = contour_level
@@ -229,17 +229,30 @@ class LCDM_Contour(Contour):
 if __name__ == "__main__":
     CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/')
     #CPL_Contour.test_contour_exists()
-    CPL_Contour.pickle_contour()
+    #CPL_Contour.pickle_contour()
     #CPL_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #CPL_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
-    JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
+    #JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/', bins_tuple=(20,20,20))
     #JBP_Contour.test_contour_exists()
-    JBP_Contour.pickle_contour()
+    #JBP_Contour.pickle_contour()
     #JBP_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #JBP_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
-    LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
-    LCDM_Contour.pickle_contour()
+    #LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
+    #LCDM_Contour.pickle_contour()
     #print LCDM_Contour.test_contour_exists()
     #LCDM_Contour.plot_contour()
+    '''
+    cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60),(70,70,70),(80,80,80)]
+    for cpl_bins in cpl_bins_tuples:
+        print cpl_bins
+        CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=cpl_bins,tolerance=0.001)
+        CPL_Contour.plot_contour()
+    '''
+
+CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80),tolerance=0.001)
+CPL_Contour.plot_contour_3d()
+CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80))
+CPL_Contour.plot_contour_3d()
+plt.show()

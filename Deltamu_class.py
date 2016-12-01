@@ -202,14 +202,25 @@ cpl_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=parameter_sets[0]
 jbp_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
 t0 = ti.time()
-Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
-Deltamu_lcdm.write_minmax_deltamuparameters()
+#Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
+#Deltamu_lcdm.write_minmax_deltamuparameters()
 
-Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
-Deltamu_cpl.write_minmax_deltamuparameters()
+#Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
+#Deltamu_cpl.write_minmax_deltamuparameters()
 
-Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
-Deltamu_jbp.write_minmax_deltamuparameters()
+#Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
+#Deltamu_jbp.write_minmax_deltamuparameters()
+
+#cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
+#cpl_bins_tuples = [(70,70,70),(80,80,80),(90,90,90),(100,100,100),(110,110,110)]
+#for cpl_bins in cpl_bins_tuples:
+#	Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=cpl_bins, do_marg=True)
+#	Deltamu_cpl.write_minmax_deltamuparameters()
+
+lcdm_bins_tuples = [50,60,70,80,90,100,110,120,130]
+for lcdm_bins in lcdm_bins_tuples:
+	Deltamu_lcdm = Deltamu('lcdm', lcdm_string, bins_tuple=lcdm_bins, do_marg=True)
+	Deltamu_lcdm.write_minmax_deltamuparameters()
 print "Classes done in:", ti.time() - t0, "seconds"
 
 
