@@ -32,177 +32,196 @@ def lin_interp_array(X,Y,X_interp):
 def chi2(m, redshifts, distmod, redshifts_marg, distmod_lcdm_marg, sigma_marg):
 	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_lcdm_marg )**2 / sigma_marg**2 )
 
-def get_parameters_minmax(parameter_sets, deltamu, marg=0.):
-	deltamu_max = np.zeros(len(redshifts))
-	deltamu_min = np.zeros(len(redshifts))
-	if len(np.shape(parameter_sets)) == 2:
-		parameters_max = np.zeros((len(redshifts),3))
-		parameters_min = np.zeros((len(redshifts),3))
-		for jj in np.arange(len(redshifts)):
-			deltamu_marg = deltamu[jj,:] + marg
-			deltamu_max[jj] = np.max(deltamu_marg)
-			deltamu_min[jj] = np.min(deltamu_marg)
-			param_max = np.array([ parameter_sets[0][np.argmax(deltamu_marg)], parameter_sets[1][np.argmax(deltamu_marg)], parameter_sets[2][np.argmax(deltamu_marg)] ])
-			param_min = np.array([ parameter_sets[0][np.argmin(deltamu_marg)], parameter_sets[1][np.argmin(deltamu_marg)], parameter_sets[2][np.argmin(deltamu_marg)] ])
-			parameters_max[jj,:] = param_max
-			parameters_min[jj,:] = param_min
-	else:
-		parameters_max = np.zeros(len(redshifts))
-		parameters_min = np.zeros(len(redshifts))
-		for jj in np.arange(len(redshifts)):
-			deltamu_marg = deltamu[jj,:] + marg
-			deltamu_max[jj] = np.max(deltamu_marg)
-			deltamu_min[jj] = np.min(deltamu_marg)
-			param_max = np.array([parameter_sets[np.argmax(deltamu_marg)]])
-			param_min = np.array([parameter_sets[np.argmin(deltamu_marg)]])
-			parameters_max[jj] = param_max
-			parameters_min[jj] = param_min
+class Deltamu(object):
+	"""A contour class for 3d contours
+	"""
+	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
+		redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
+		tolerance = 0.005, bins_tuple=(50,50,50), do_marg=False, redshift_marg_min=0.1,\
+		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='lin'):
 
-	return parameters_min, parameters_max, deltamu_min, deltamu_max
+		self.chain_name = chain_name
+		self.cosmology_string = cosmology_string
+		self.directory = directory
+		self.redshifts = redshifts
+		self.sigmas_marg = sigmas_marg
+		self.contour_level = contour_level
+		self.tolerance = tolerance
+		self.bins_tuple = bins_tuple
+		self.do_marg = do_marg
+		self.redshift_marg_min = redshift_marg_min
+		self.redshift_marg_max = redshift_marg_max
+		self.redshift_marg_n = redshift_marg_n
+		self.redshifts_marg_method = redshifts_marg_method
+
+		if redshifts_marg_method == 'lin':
+			self.redshifts_marg = np.linspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
+		elif redshifts_marg_method == 'log':
+			self.redshifts_marg = np.logspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
+		if self.sigmas_marg == None:
+			self.sigmas_marg = np.ones(redshift_marg_n) * 0.1
 
 
-def write_deltamu(cosmology_string, parameter_sets, length_loop, f_name):
-	
-	#First we preallocate some memory
-	distmod = np.zeros((len(redshifts),length_loop))
-	deltamu = np.zeros((len(redshifts),length_loop))
-	marg = np.zeros(length_loop)
+		self.deltamu = self.get_deltamu()
+		self.lcdm_bestfit = cosmo.FlatLambdaCDM(H0=hubble_const, Om0=omega_m_lcdm_bestfit)
+		self.distmod_bestfit_lcdm = lcdm_bestfit.distmod(self.redshifts)
 
-    #For each parameter set, we define a cosmology and calculate distance moduli.
-    #These are then used to calculate deltamu, and if marginalising is chosen
-    #the magninalisation constants are calculated and stored.
+	def write_minmax_deltamuparameters(self):
+		'''Writes min/max deltamu and parameters to pickle file
+		'''
+		if self.chain_name == 'lcdm':
+			f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
+			"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + ".dat"
+		else:
+			f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
+			"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
+			str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + ".dat"
 
-    #Need to get the max/min deltamu values for each redshift, and parameter set
-    #that gave that value
-	print "Calculating deltamu values..."
-	for ii in np.arange(length_loop):
-		#print ii
-		exec(cosmology_string)
-		distmod[:,ii] = cosmology.distmod(redshifts)
-		deltamu[:,ii] = distmod[:,ii] - np.array(distmod_bestfit_lcdm)
-		
-		if do_marg:
-			m_marg = opt.fmin(chi2,x0=0.,args=(redshifts, distmod[:,ii], redshifts_marg, distmod_lcdm_marg, sigma_marg),xtol=0.005,disp=0)
-			marg[ii] = m_marg
+		parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=0.)
 
-	print deltamu[:,ii][:10]
-    
-	print "Getting min/max parameters and deltamus"
-	parameters_min, parameters_max, deltamu_min, deltamu_max = get_parameters_minmax(parameter_sets, deltamu)
-    
-	print "Dumping data to file"
-	data_dump = redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
-	data_file_name = f_name
-	output = open(data_file_name,'wb')
-	pick.dump(data_dump,output)
-	output.close()
-
-	if do_marg:
-		parameters_min, parameters_max, deltamu_min, deltamu_max = get_parameters_minmax(parameter_sets, deltamu, marg)
-		data_dump = redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
-		data_file_name = f_name + '_marg'
+		print "Dumping data to file", f_name
+		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
+		data_file_name = self.directory + "Deltamu/" + f_name
 		output = open(data_file_name,'wb')
 		pick.dump(data_dump,output)
 		output.close()
-	
+
+		if self.do_marg:
+			if self.chain_name == 'lcdm':
+				f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
+				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + "_marg_" +\
+				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
+				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
+			else:
+				f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
+				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
+				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg_" +\
+				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
+				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
+
+			parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=self.marg)
+
+			print "Dumping data to file", f_name
+			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
+			data_file_name = self.directory + "Deltamu/"+ f_name
+			output = open(data_file_name,'wb')
+			pick.dump(data_dump,output)
+			output.close()
+
+
+	def get_deltamu(self):
+		'''Returns deltamu values for given cosmology
+		'''
+		self.parameter_sets = self.get_parameters()
+		parameter_sets = self.parameter_sets
+		print np.shape(parameter_sets)
+		length_loop = np.shape(parameter_sets)[-1]
+		if self.do_marg == True:
+			self.marg = np.zeros(length_loop)
+		print self.chain_name, length_loop
+		deltamu = np.zeros((len(self.redshifts),length_loop))
+		distmod = np.zeros((len(self.redshifts),length_loop))
+
+		if self.do_marg:
+			self.distmod_lcdm_marg = np.array(lcdm_bestfit.distmod(self.redshifts_marg))
+
+		print "Calculating deltamu values..."
+		for ii in np.arange(length_loop):
+			#print ii
+			exec(self.cosmology_string)
+			distmod[:,ii] = cosmology.distmod(self.redshifts)
+			deltamu[:,ii] = distmod[:,ii] - np.array(distmod_bestfit_lcdm)
+					
+			if self.do_marg:
+				m_marg = opt.fmin(chi2,x0=0.,args=(self.redshifts, distmod[:,ii], self.redshifts_marg, self.distmod_lcdm_marg, self.sigmas_marg),xtol=0.005,disp=0)
+				self.marg[ii] = m_marg
+		return deltamu
+
+	def get_minmax_deltamuparameters(self, margi=0.):
+		'''Returns min/max deltamu and associated
+		parameter values
+		'''
+		deltamu_max = np.zeros(len(self.redshifts))
+		deltamu_min = np.zeros(len(self.redshifts))
+		if len(np.shape(self.parameter_sets)) == 2:
+			parameters_max = np.zeros((len(self.redshifts),3))
+			parameters_min = np.zeros((len(self.redshifts),3))
+			for jj in np.arange(len(self.redshifts)):
+				deltamu_marg = self.deltamu[jj,:] + margi
+				deltamu_max[jj] = np.max(deltamu_marg)
+				deltamu_min[jj] = np.min(deltamu_marg)
+				param_max = np.array([ self.parameter_sets[0][np.argmax(deltamu_marg)], self.parameter_sets[1][np.argmax(deltamu_marg)], self.parameter_sets[2][np.argmax(deltamu_marg)] ])
+				param_min = np.array([ self.parameter_sets[0][np.argmin(deltamu_marg)], self.parameter_sets[1][np.argmin(deltamu_marg)], self.parameter_sets[2][np.argmin(deltamu_marg)] ])
+				parameters_max[jj,:] = param_max
+				parameters_min[jj,:] = param_min
+		else:
+			parameters_max = np.zeros(len(self.redshifts))
+			parameters_min = np.zeros(len(self.redshifts))
+			for jj in np.arange(len(self.redshifts)):
+				deltamu_marg = self.deltamu[jj,:] + margi
+				deltamu_max[jj] = np.max(deltamu_marg)
+				deltamu_min[jj] = np.min(deltamu_marg)
+				param_max = np.array([self.parameter_sets[np.argmax(deltamu_marg)]])
+				param_min = np.array([self.parameter_sets[np.argmin(deltamu_marg)]])
+				parameters_max[jj] = param_max
+				parameters_min[jj] = param_min
+
+		return parameters_min, parameters_max, deltamu_min, deltamu_max
+
+	def get_parameters(self):
+		'''Returns parameter sets on contour of given cosmology
+		'''
+		if self.chain_name == 'lcdm':
+			Parameter_contour = Contour.LCDM_Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple)
+		else:
+			Parameter_contour = Contour.Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple)
+
+		print "Does", self.chain_name ,"contour exist?",
+		if Parameter_contour.test_contour_exists():
+			print "Yes"
+		else:
+			print "No"
+			Parameter_contour.pickle_contour()
+
+		if self.chain_name == 'lcdm':
+			parameter_sets = Parameter_contour.read_pickled_contour()
+		else:
+			omega_contour, w0_contour, wa_contour = Parameter_contour.read_pickled_contour()
+			parameter_sets = omega_contour, w0_contour, wa_contour
 		
-def define_redshifts_marg(zmin=0.1, zmax=10., nz=10, sigma=0.1):
-	redshifts_marg = np.linspace(zmin, zmax, nz)
-	sigma_marg = np.ones(len(redshifts_marg)) * sigma
-	return redshifts_marg, sigma_marg
+		return parameter_sets
 
-def define_contours(lcdm_contour_level = 0.68, lcdm_tolerance = 0.01, lcdm_bins_tuple=100,cpl_contour_level = 0.68, cpl_tolerance = 0.005, cpl_bins_tuple=(50,50,50),jbp_contour_level = 0.68, jbp_tolerance = 0.005, jbp_bins_tuple=(50,50,50)):
-	#Set contours we need and check that they exist
-	LCDM_Contour = Contour.LCDM_Contour(chain_name='lcdm',directory='/Users/perandersen/Data/HzSC/',contour_level=lcdm_contour_level,tolerance=lcdm_tolerance,bins_tuple=lcdm_bins_tuple)
-	print "Does LCDM Contour exist?",
-	if LCDM_Contour.test_contour_exists():
-		print "Yes"
-	else:
-		print "No"
-		LCDM_Contour.pickle_contour()
-
-	CPL_Contour = Contour.Contour(chain_name='cpl',directory='/Users/perandersen/Data/HzSC/',contour_level=cpl_contour_level,tolerance=cpl_tolerance,bins_tuple=cpl_bins_tuple)
-	print "Does CPL Contour exist?",
-	if CPL_Contour.test_contour_exists():
-		print "Yes"
-	else:
-		print "No"
-		CPL_Contour.pickle_contour()
-	JBP_Contour = Contour.Contour(chain_name='jbp',directory='/Users/perandersen/Data/HzSC/',contour_level=jbp_contour_level,tolerance=jbp_tolerance,bins_tuple=jbp_bins_tuple)
-	print "Does JBP Contour exist?",
-	if JBP_Contour.test_contour_exists():
-		print "Yes"
-	else:
-		print "No"
-		JBP_Contour.pickle_contour()
-
-	#Read in contours
-	print "Reading in contours...",
-	lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple = LCDM_Contour.read_pickled_contour()
-
-	cpl_omega_contour, cpl_w0_contour, cpl_wa_contour, cpl_contour_level, cpl_tolerance, cpl_bins_tuple = CPL_Contour.read_pickled_contour()
-	cpl_parameter_sets = cpl_omega_contour, cpl_w0_contour, cpl_wa_contour
-
-	jbp_omega_contour, jbp_w0_contour, jbp_wa_contour, jbp_contour_level, jbp_tolerance, jbp_bins_tuple = JBP_Contour.read_pickled_contour()
-	jbp_parameter_sets = jbp_omega_contour, jbp_w0_contour, jbp_wa_contour
-	print "Done!"
-	return lcdm_parameter_sets, lcdm_contour_level, lcdm_tolerance, lcdm_bins_tuple, cpl_parameter_sets, cpl_contour_level, cpl_tolerance, cpl_bins_tuple, jbp_parameter_sets, jbp_contour_level, jbp_tolerance, jbp_bins_tuple
-
-
-lcdm_parameter_sets,lcdm_contour_level,lcdm_tolerance,lcdm_bins_tuple,cpl_parameter_sets,cpl_contour_level,cpl_tolerance,cpl_bins_tuple,jbp_parameter_sets,jbp_contour_level,jbp_tolerance,jbp_bins_tuple = define_contours(jbp_bins_tuple=(20,20,20))
-
-
-
-#Define the best fit LCDM parameter
 omega_m_lcdm_bestfit, hubble_const = 0.30754277645, 70.
+redshifts=np.linspace(0.001,10.,1000)
 
-#Decide if we want to do marginalization run too (time consuming)
-do_marg = True
-
-#Define redshift range
-#(Needs to be dense enough to get fine detail at lower redshifts)
-redshifts = np.linspace(0.001, 10, 1000)
-
-#Create redshift range to marginalise with, need to experiment with this
-if do_marg:
-	redshifts_marg, sigma_marg = define_redshifts_marg()
-
-
-#Defining cosmology for best fitting parameters and derive distance moduli
-#for the redshift range we look at
 lcdm_bestfit = cosmo.FlatLambdaCDM(H0=hubble_const, Om0=omega_m_lcdm_bestfit)
 distmod_bestfit_lcdm = lcdm_bestfit.distmod(redshifts)
 
-if do_marg:    
-    #Distance moduli for marginalising over
-    distmod_lcdm_marg = np.array(lcdm_bestfit.distmod(redshifts_marg))
+lcdm_string = 'cosmology=cosmo.FlatLambdaCDM(H0=hubble_const, Om0=parameter_sets[ii])'
+cpl_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
+jbp_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
-print "Function begin"
 t0 = ti.time()
-lcdm_cosmo_string = 'cosmology=cosmo.FlatLambdaCDM(H0=hubble_const, Om0=lcdm_parameter_sets[ii])'
-cpl_cosmo_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=cpl_parameter_sets[0][ii], w0=cpl_parameter_sets[1][ii], wa=cpl_parameter_sets[2][ii])'
-jbp_cosmo_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=jbp_parameter_sets[0][ii], w0=jbp_parameter_sets[1][ii], wa=jbp_parameter_sets[2][ii])'
+#Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=100,do_marg=True)
+#Deltamu_lcdm.write_minmax_deltamuparameters()
 
-root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
-lcdm_fname = "deltamu_lcdm_c" + str(lcdm_contour_level) +\
-"_t" + str(lcdm_tolerance) + "_b" + str(lcdm_bins_tuple) + ".dat"
+#Deltamu_cpl = Deltamu('cpl',cpl_string,do_marg=True)
+#Deltamu_cpl.write_minmax_deltamuparameters()
 
-cpl_fname = "deltamu_cpl_c" + str(cpl_contour_level) +\
-"_t" + str(cpl_tolerance) + "_b" + str(cpl_bins_tuple[0]) + \
-str(cpl_bins_tuple[1]) + str(cpl_bins_tuple[2]) + ".dat"
+#Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
+#Deltamu_jbp.write_minmax_deltamuparameters()
 
-jbp_fname = "deltamu_jbp_c" + str(jbp_contour_level) +\
-"_t" + str(jbp_tolerance) + "_b" + str(jbp_bins_tuple[0]) + \
-str(jbp_bins_tuple[1]) + str(jbp_bins_tuple[2]) + ".dat"
+#cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
+#cpl_bins_tuples = [(70,70,70),(80,80,80),(90,90,90),(100,100,100),(110,110,110)]
+#for cpl_bins in cpl_bins_tuples:
+#	Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=cpl_bins, do_marg=True)
+#	Deltamu_cpl.write_minmax_deltamuparameters()
 
-write_deltamu(lcdm_cosmo_string, lcdm_parameter_sets, len(lcdm_parameter_sets), root_dir + lcdm_fname)
-write_deltamu(cpl_cosmo_string, cpl_parameter_sets, np.shape(cpl_parameter_sets)[1], root_dir + cpl_fname)
-write_deltamu(jbp_cosmo_string, jbp_parameter_sets, np.shape(jbp_parameter_sets)[1], root_dir + jbp_fname)
+lcdm_bins_tuples = [50,60,70,80,90,100,110,120,130]
+for lcdm_bins in lcdm_bins_tuples:
+	Deltamu_lcdm = Deltamu('lcdm', lcdm_string, bins_tuple=lcdm_bins, do_marg=True)
+	Deltamu_lcdm.write_minmax_deltamuparameters()
+print "Classes done in:", ti.time() - t0, "seconds"
 
-print "Function end in:", ti.time() - t0, "seconds"
-
-#----Get the max/min deltamu values and the parameter sets, as function of redshift
-
-#----Save values, redshifts, and parameter sets to file
 
 
