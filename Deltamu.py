@@ -29,16 +29,16 @@ def lin_interp_array(X,Y,X_interp):
                 Y_interp[j] = Y[i-1] + (Y[i]-Y[i-1]) * (X_interp[j] - X[i-1]) / (X[i] - X[i-1])
     return Y_interp
 
-def chi2(m, redshifts, distmod, redshifts_marg, distmod_lcdm_marg, sigma_marg):
-	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_lcdm_marg )**2 / sigma_marg**2 )
+def chi2(m, redshifts, distmod, redshifts_marg, distmod_marg, sigma_marg):
+	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
 
 class Deltamu(object):
 	"""A contour class for 3d contours
 	"""
 	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
 		redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
-		tolerance = 0.005, bins_tuple=(50,50,50), do_marg=False, redshift_marg_min=0.1,\
-		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='lin'):
+		tolerance = 0.005, bins_tuple=(20,20,20), do_marg=False, redshift_marg_min=0.1,\
+		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla'):
 
 		self.chain_name = chain_name
 		self.cosmology_string = cosmology_string
@@ -58,13 +58,23 @@ class Deltamu(object):
 			self.redshifts_marg = np.linspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
 		elif redshifts_marg_method == 'log':
 			self.redshifts_marg = np.logspace(self.redshift_marg_min,self.redshift_marg_max,self.redshift_marg_n)
-		if self.sigmas_marg == None:
+		elif self.redshifts_marg_method == 'jla':
+			self.redshifts_marg, self.distmod_marg, self.sigmas_marg = self.read_jla_sample()
+			self.redshift_marg_n = len(self.redshifts_marg)
+			self.redshift_marg_max = np.max(self.redshifts_marg)
+			self.redshift_marg_min = np.min(self.redshifts_marg)
+
+		if type(self.sigmas_marg).__module__ != np.__name__:
 			self.sigmas_marg = np.ones(redshift_marg_n) * 0.1
 
 
 		self.deltamu = self.get_deltamu()
 		self.lcdm_bestfit = cosmo.FlatLambdaCDM(H0=hubble_const, Om0=omega_m_lcdm_bestfit)
 		self.distmod_bestfit_lcdm = lcdm_bestfit.distmod(self.redshifts)
+
+	def read_jla_sample(self):
+		jla_sample = np.genfromtxt(self.directory + 'JLA.txt')
+		return jla_sample[:,0], jla_sample[:,1], jla_sample[:,2]
 
 	def write_minmax_deltamuparameters(self):
 		'''Writes min/max deltamu and parameters to pickle file
@@ -108,7 +118,6 @@ class Deltamu(object):
 			pick.dump(data_dump,output)
 			output.close()
 
-
 	def get_deltamu(self):
 		'''Returns deltamu values for given cosmology
 		'''
@@ -123,7 +132,10 @@ class Deltamu(object):
 		distmod = np.zeros((len(self.redshifts),length_loop))
 
 		if self.do_marg:
-			self.distmod_lcdm_marg = np.array(lcdm_bestfit.distmod(self.redshifts_marg))
+			if self.redshifts_marg_method == 'jla':
+				pass
+			else:
+				self.distmod_marg = np.array(lcdm_bestfit.distmod(self.redshifts_marg))
 
 		print "Calculating deltamu values..."
 		for ii in np.arange(length_loop):
@@ -133,7 +145,7 @@ class Deltamu(object):
 			deltamu[:,ii] = distmod[:,ii] - np.array(distmod_bestfit_lcdm)
 					
 			if self.do_marg:
-				m_marg = opt.fmin(chi2,x0=0.,args=(self.redshifts, distmod[:,ii], self.redshifts_marg, self.distmod_lcdm_marg, self.sigmas_marg),xtol=0.005,disp=0)
+				m_marg = opt.fmin(chi2,x0=0.,args=(self.redshifts, distmod[:,ii], self.redshifts_marg, self.distmod_marg, self.sigmas_marg),xtol=0.005,disp=0)
 				self.marg[ii] = m_marg
 		return deltamu
 
@@ -211,16 +223,16 @@ t0 = ti.time()
 #Deltamu_jbp = Deltamu('jbp',jbp_string, bins_tuple=(20,20,20),do_marg=True)
 #Deltamu_jbp.write_minmax_deltamuparameters()
 
-#cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
+cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 #cpl_bins_tuples = [(70,70,70),(80,80,80),(90,90,90),(100,100,100),(110,110,110)]
-#for cpl_bins in cpl_bins_tuples:
-#	Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=cpl_bins, do_marg=True)
-#	Deltamu_cpl.write_minmax_deltamuparameters()
+for cpl_bins in cpl_bins_tuples:
+	Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=cpl_bins, do_marg=True)
+	Deltamu_cpl.write_minmax_deltamuparameters()
 
 lcdm_bins_tuples = [50,60,70,80,90,100,110,120,130]
-for lcdm_bins in lcdm_bins_tuples:
-	Deltamu_lcdm = Deltamu('lcdm', lcdm_string, bins_tuple=lcdm_bins, do_marg=True)
-	Deltamu_lcdm.write_minmax_deltamuparameters()
+#for lcdm_bins in lcdm_bins_tuples:
+#	Deltamu_lcdm = Deltamu('lcdm', lcdm_string, bins_tuple=lcdm_bins, do_marg=True)
+#	Deltamu_lcdm.write_minmax_deltamuparameters()
 print "Classes done in:", ti.time() - t0, "seconds"
 
 

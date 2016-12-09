@@ -251,8 +251,8 @@ if __name__ == "__main__":
         CPL_Contour.plot_contour()
     '''
 
-CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80),tolerance=0.001)
-CPL_Contour.plot_contour_3d()
-CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80))
-CPL_Contour.plot_contour_3d()
-plt.show()
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80),tolerance=0.001)
+    CPL_Contour.plot_contour_3d()
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80))
+    CPL_Contour.plot_contour_3d()
+    plt.show()
