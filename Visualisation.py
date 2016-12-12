@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle as pick
 import Contour
+import Deltamu
 
 '''
 Program to analyse and plot output from the Deltamu functions. 
@@ -45,10 +46,12 @@ def get_unique_parameter_sets(fname):
     elif len(np.shape(parameters_min)) == 2:
         unique_par_sets_min = unique_par_sets_3d(parameters_min)
         unique_par_sets_max = unique_par_sets_3d(parameters_max)
+    for ii in np.arange(len(unique_par_sets_min)):
+        print unique_par_sets_min[ii]
     return unique_par_sets_min, unique_par_sets_max
 
 def get_file_name(chain_name, bins_tuple, contour_level=0.68, tolerance=0.005, do_marg=False,\
-    redshifts_marg_method='lin', redshift_marg_min=0.1,redshift_marg_max=10., redshift_marg_n=10):
+    redshifts_marg_method='jla', redshift_marg_min=0.1,redshift_marg_max=10., redshift_marg_n=10):
     if chain_name == 'lcdm':
         f_name = "deltamu_lcdm_c" + str(contour_level) +\
         "_t" + str(tolerance) + "_b" + str(bins_tuple) + ".dat"
@@ -77,6 +80,7 @@ def plot_minmax_deltamu(fname, title, legend_string=None):
     plt.plot(redshifts, deltamu_min,label=legend_string)
     plt.plot(redshifts, deltamu_max)
     plt.title(title)
+    plt.show()
 
 def plot_min_deltamu(fname, title, legend_string=None):
     redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
@@ -93,11 +97,11 @@ def plot_max_deltamu(fname, title, legend_string=None):
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 lcdm_fname = get_file_name(chain_name='lcdm',bins_tuple=100,tolerance=0.01)
-lcdm_marg_fname = get_file_name(chain_name='lcdm',bins_tuple=100,tolerance=0.01,do_marg=True)
 jbp_fname = get_file_name(chain_name='jbp',bins_tuple=(20,20,20))
-jbp_marg_fname = get_file_name(chain_name='jbp',bins_tuple=(20,20,20),do_marg=True)
-cpl_fname = get_file_name(chain_name='cpl',bins_tuple=(50,50,50))
-cpl_marg_fname = get_file_name(chain_name='cpl',bins_tuple=(50,50,50),do_marg=True)
+cpl_fname = get_file_name(chain_name='cpl',bins_tuple=(20,20,20))
+
+deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20))
+cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
 #get_unique_parameter_sets(root_dir + lcdm_fname)
 #get_unique_parameter_sets(root_dir + cpl_fname)
@@ -112,24 +116,85 @@ cpl_marg_fname = get_file_name(chain_name='cpl',bins_tuple=(50,50,50),do_marg=Tr
 #plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
 #plot_minmax_deltamu(root_dir + cpl_marg_fname, 'cpl')
 
-'''
-cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60),(70,70,70)]
+
+#cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
+cpl_bins_tuples = [(20,20,20)]
 plt.figure()
 for cpl_bins in cpl_bins_tuples:
-    cpl_fname = get_file_name(chain_name='cpl',bins_tuple=cpl_bins)
-    plot_min_deltamu(root_dir + cpl_fname, 'cpl', legend_string=str(cpl_bins[0]))
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
 plt.legend()
 
 plt.figure()
 for cpl_bins in cpl_bins_tuples:
-    cpl_fname = get_file_name(chain_name='cpl',bins_tuple=cpl_bins)
-    plot_max_deltamu(root_dir + cpl_fname, 'cpl', legend_string=str(cpl_bins[0]))
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+    get_unique_parameter_sets(root_dir + cpl_marg_fname)
+    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
+plt.legend()
+
+
+'''
+jbp_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
+plt.figure()
+for jbp_bins in jbp_bins_tuples:
+    deltamu_jbp = Deltamu.Deltamu('jbp','',do_marg=True,bins_tuple=jbp_bins)
+    jbp_marg_fname = deltamu_jbp.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + jbp_marg_fname)
+    plot_min_deltamu(root_dir + jbp_marg_fname, 'jbp', legend_string=str(jbp_bins[0]))
+plt.legend()
+
+plt.figure()
+for jbp_bins in jbp_bins_tuples:
+    deltamu_jbp = Deltamu.Deltamu('jbp','',do_marg=True,bins_tuple=jbp_bins)
+    jbp_marg_fname = deltamu_jbp.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + jbp_marg_fname)
+    plot_max_deltamu(root_dir + jbp_marg_fname, 'jbp', legend_string=str(jbp_bins[0]))
 plt.legend()
 '''
-lcdm_bins_tuples = [50,70,90,110,120,130]
-for lcdm_bins in lcdm_bins_tuples:
-    lcdm_fname = get_file_name(chain_name='lcdm',bins_tuple=lcdm_bins)
-    plot_min_deltamu(root_dir + lcdm_fname, 'lcdm', legend_string=str(lcdm_bins))
+
+'''
+n3cpl_bins_tuples = [(20,20,20),(30,30,30)]
+plt.figure()
+for n3cpl_bins in n3cpl_bins_tuples:
+    deltamu_n3cpl = Deltamu.Deltamu('n3cpl','',do_marg=True,bins_tuple=n3cpl_bins)
+    n3cpl_marg_fname = deltamu_n3cpl.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + n3cpl_marg_fname)
+    plot_min_deltamu(root_dir + n3cpl_marg_fname, 'n3cpl', legend_string=str(n3cpl_bins[0]))
 plt.legend()
+
+plt.figure()
+for n3cpl_bins in n3cpl_bins_tuples:
+    deltamu_n3cpl = Deltamu.Deltamu('n3cpl','',do_marg=True,bins_tuple=n3cpl_bins)
+    n3cpl_marg_fname = deltamu_n3cpl.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + n3cpl_marg_fname)
+    plot_max_deltamu(root_dir + n3cpl_marg_fname, 'n3cpl', legend_string=str(n3cpl_bins[0]))
+plt.legend()
+'''
+'''
+n7cpl_bins_tuples = [(20,20,20)]
+plt.figure()
+for n7cpl_bins in n7cpl_bins_tuples:
+    deltamu_n7cpl = Deltamu.Deltamu('n7cpl','',do_marg=True,bins_tuple=n7cpl_bins)
+    n7cpl_marg_fname = deltamu_n7cpl.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + n7cpl_marg_fname)
+    plot_min_deltamu(root_dir + n7cpl_marg_fname, 'n7cpl', legend_string=str(n7cpl_bins[0]))
+plt.legend()
+
+plt.figure()
+for n7cpl_bins in n7cpl_bins_tuples:
+    deltamu_n7cpl = Deltamu.Deltamu('n7cpl','',do_marg=True,bins_tuple=n7cpl_bins)
+    n7cpl_marg_fname = deltamu_n7cpl.get_marg_file_name()
+    #print get_unique_parameter_sets(root_dir + n7cpl_marg_fname)
+    plot_max_deltamu(root_dir + n7cpl_marg_fname, 'n7cpl', legend_string=str(n7cpl_bins[0]))
+plt.legend()
+'''
+
+#lcdm_bins_tuples = [50,70,90,110,120,130]
+#for lcdm_bins in lcdm_bins_tuples:
+#    lcdm_fname = get_file_name(chain_name='lcdm',bins_tuple=lcdm_bins)
+#    plot_min_deltamu(root_dir + lcdm_fname, 'lcdm', legend_string=str(lcdm_bins))
+#plt.legend()
 plt.show()
 

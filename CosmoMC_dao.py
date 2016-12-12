@@ -64,7 +64,7 @@ class CosmoMC_dao(object):
         return param_indices
 
 
-    def get_parameter_chains(self,indices=[]):
+    def get_parameter_chains(self,burn,indices=[]):
         files =  os.listdir(self.directory) #Get all files in dir
         files = [s for s in files if self.chain_name in s] #Find ones associated with chain
         files = [s for s in files if 'txt' in s]#Find only data files
@@ -83,7 +83,7 @@ class CosmoMC_dao(object):
         for ff in files:
             data_from_file = np.genfromtxt(self.directory + ff)
             print ff, np.shape(data_from_file)
-            data_all = np.concatenate((data_all, data_from_file))
+            data_all = np.concatenate((data_all, data_from_file[burn:,:]))
         
         #Data from
         weights = data_all[:,0]
@@ -102,9 +102,9 @@ class CosmoMC_dao(object):
             index_counter = 0
         return data_indices
 
-    def pickle_sliced_chains(self,indices=[],fname="", burn=3000):
-        data = self.get_parameter_chains(indices=indices)
-        data = data[burn:,:]
+    def pickle_sliced_chains(self,indices=[],fname="", burn=2000):
+        data = self.get_parameter_chains(indices=indices,burn=burn)
+        
         data_labels = self.get_parameter_names(indices=indices)
         output = [data, data_labels]
         data_file_name = self.directory + "../Pickle/" + fname
@@ -130,6 +130,9 @@ if __name__ == "__main__":
     cosmomc_lcdm = CosmoMC_dao('lcdm', '/Users/perandersen/Data/HzSC/Chains/LCDM/')
     cosmomc_cpl = CosmoMC_dao('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/')
     cosmomc_jbp = CosmoMC_dao('jbp', '/Users/perandersen/Data/HzSC/Chains/JBP/')
+    cosmomc_jbp_ns = CosmoMC_dao('jbp-ns', '/Users/perandersen/Data/HzSC/Chains/JBP-ns/')
+    cosmomc_n3cpl = CosmoMC_dao('n3cpl', '/Users/perandersen/Data/HzSC/Chains/n3CPL/')
+    cosmomc_n7cpl = CosmoMC_dao('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/')
 
     '''Test printing of parameter names. Should be run one at a time'''
     #cosmomc_lcdm.print_parameter_names(["omega", "chi"])
@@ -137,6 +140,10 @@ if __name__ == "__main__":
     #cosmomc_lcdm.print_parameter_names(["chi", "omega"])
     #cosmomc_lcdm.print_parameter_names(["omega"])
     #cosmomc_cpl.print_parameter_names(["omega", "w"])
+    #cosmomc_jbp.print_parameter_names(["omega", "w"])
+    #cosmomc_jbp_ns.print_parameter_names(["omega", "w"])
+    #cosmomc_n3cpl.print_parameter_names(["omega", "w"])
+    #cosmomc_n7cpl.print_parameter_names(["omega", "w"])
 
     '''Below tests getting data, gets and plots it'''
     
@@ -164,9 +171,12 @@ if __name__ == "__main__":
     
 
     '''Below tests writing and reading data'''
-    cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
-    cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
-    cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
+    #cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
+    #cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
+    #cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
+    cosmomc_jbp_ns.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp-ns_chains.pkl')
+    cosmomc_n3cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n3cpl_chains.pkl')
+    cosmomc_n7cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n7cpl_chains.pkl')
     
     #data, data_labels = cosmomc_cpl.read_pickled_chains(fname='cpl_contours.pkl')
     #print cosmomc_cpl.get_parameter_names(indices=[31, 6, 7])

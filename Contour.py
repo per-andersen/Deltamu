@@ -3,43 +3,56 @@ import numpy as np
 import pickle as pick
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
+from scipy.ndimage.filters import gaussian_filter
 
 class Contour(object):
     """A contour class for 3d contours
     """
 
-    def __init__(self, chain_name, directory, contour_level = 0.68, tolerance = 0.001, bins_tuple=(50,50,50)):
+    def __init__(self, chain_name, directory, contour_level = 0.68, tolerance = 0.001, bins_tuple=(50,50,50),smoothing=0):
         self.chain_name = chain_name
         self.directory = directory
         self.contour_level = contour_level
         self.tolerance = tolerance
         self.bins_tuple = bins_tuple
+        self.smoothing = smoothing
 
     #These first methods deal with handling data from CosmoMC_dao, creating
     #histogram and contours and finally writing to .pkl file
     def histogram_points(self):
         points, data_labels = self.read_pickled_chains()
-        H, edges = np.histogramdd(points, bins = self.bins_tuple)
+        hist, edges = np.histogramdd(points, bins = self.bins_tuple)
+
+        if self.smoothing != 0:
+            hist = gaussian_filter(hist, self.smoothing)
+
         xbins = edges[0]
         ybins = edges[1]
         zbins = edges[2]
         
-        shape = H.shape
+        shape = hist.shape
         
-        H = H.ravel() # Returns a flattened array
+        hist = hist.ravel() # Returns a flattened array
         
-        i_sort = np.argsort(H)[::-1] # Returns indices sorting H from largest to smallest
+        i_sort = np.argsort(hist)[::-1] # Returns indices sorting hist from largest to smallest
         i_unsort = np.argsort(i_sort)# Returns indices undoing sort above
         
-        H_cumsum = H[i_sort].cumsum() # Gets the cumulative sum, adding most filled indices first
+        hist_cumsum = hist[i_sort].cumsum() # Gets the cumulative sum, adding most filled indices first
         
-        H_cumsum /= H_cumsum[-1]
+        hist_cumsum /= hist_cumsum[-1]
         
         xbins = 0.5 * (xbins[1:] + xbins[:-1])
         ybins = 0.5 * (ybins[1:] + ybins[:-1])
         zbins = 0.5 * (zbins[1:] + zbins[:-1])
         
-        sigma = H_cumsum[i_unsort].reshape(shape)
+        sigma = hist_cumsum[i_unsort].reshape(shape)
+        plt.figure()
+        plt.imshow(sigma[:,:,int(self.bins_tuple[0] / 2)].T, extent=(0,1,0,1), origin='lower', interpolation='none')
+        plt.colorbar()
+        plt.figure()
+        plt.contour(xbins, ybins, sigma[:,:,int(self.bins_tuple[0] / 2)].T,levels=[0.683])
+        plt.title('Original')
+
         return xbins, ybins, zbins, sigma
 
     def histogram_to_contours(self):
@@ -57,7 +70,7 @@ class Contour(object):
                     z_contour[kk + jj*len(xbins) + ii*len(xbins)**2] = zbins[kk]
                     likelihoods[kk + jj*len(xbins) + ii*len(xbins)**2] = sigma[ii,jj,kk]
         
-        idx = np.where((np.abs(likelihoods) - self.contour_level) < self.tolerance)
+        idx = np.where((likelihoods - self.contour_level) < self.tolerance)
         x_contour = x_contour[idx]
         y_contour = y_contour[idx]
         z_contour = z_contour[idx]
@@ -70,8 +83,9 @@ class Contour(object):
         output = x_contour, y_contour, z_contour
         
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
-        "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
-        str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + ".dat"
+        "_t" + str(self.tolerance) + "_s" + str(self.smoothing) +\
+        "_b" + str(self.bins_tuple[0]) + str(self.bins_tuple[1]) +\
+        str(self.bins_tuple[2]) + ".dat"
 
         data_file_name = self.directory + "Contours/" + fname
         try:
@@ -83,8 +97,9 @@ class Contour(object):
 
     def read_pickled_contour(self):
         fname = "contour_" + self.chain_name + "_c" + str(self.contour_level) +\
-        "_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
-        str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + ".dat"
+        "_t" + str(self.tolerance) + "_s" + str(self.smoothing) +\
+        "_b" + str(self.bins_tuple[0]) + str(self.bins_tuple[1]) +\
+        str(self.bins_tuple[2]) + ".dat"
 
         pkl_data_file = open(self.directory + "Contours/" + fname,'rb')
         data = pick.load(pkl_data_file)
@@ -98,7 +113,7 @@ class Contour(object):
         return data
     
     #These methods below use the pickled contours and do stuff with them
-    def plot_contour(self, labels = ['x','y','z']):
+    def plot_contour(self, labels = ['omegam','w0','wa']):
         try:
             x_contour, y_contour, z_contour = self.read_pickled_contour()
         except:
@@ -117,7 +132,19 @@ class Contour(object):
         plt.plot(z_contour, y_contour,'.b')
         plt.xlabel(labels[2])
         plt.ylabel(labels[1])
-        plt.show()
+        #plt.show()
+
+    def plot_contour_slice(self):
+        try:
+            x_contour, y_contour, z_contour = self.read_pickled_contour()
+        except:
+            self.pickle_contour()
+            x_contour, y_contour, z_contour = self.read_pickled_contour()
+
+        x_contour = x_contour[z_contour == np.median(z_contour)]
+        y_contour = y_contour[z_contour == np.median(z_contour)]
+        plt.figure()
+        plt.plot(x_contour,y_contour,'.b')
 
     def plot_contour_3d(self, labels = ['x','y','z']):
         try:
@@ -125,11 +152,12 @@ class Contour(object):
         except:
             self.pickle_contour()
             x_contour, y_contour, z_contour = self.read_pickled_contour()
-        
+        print len(x_contour)
         fig_scatter = plt.figure()
         ax_scatter = fig_scatter.add_subplot(111, projection='3d')
         ax_scatter.scatter(x_contour, y_contour, z_contour)
         plt.show()
+
 
     def test_contour_exists(self):
         try:
@@ -251,8 +279,13 @@ if __name__ == "__main__":
         CPL_Contour.plot_contour()
     '''
 
-    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80),tolerance=0.001)
-    CPL_Contour.plot_contour_3d()
-    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(80,80,80))
-    CPL_Contour.plot_contour_3d()
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(50,50,50),tolerance = 0.001)
+    CPL_Contour.pickle_contour()
+    #CPL_Contour.plot_contour_slice()
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(50,50,50),tolerance = 0.001, smoothing=1.)
+    CPL_Contour.pickle_contour()
+    #CPL_Contour.plot_contour_slice()
+    #CPL_Contour.plot_contour_3d()
+    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30))
+    #CPL_Contour.plot_contour()
     plt.show()
