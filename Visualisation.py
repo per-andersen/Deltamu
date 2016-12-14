@@ -118,21 +118,51 @@ cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
 
 #cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
-cpl_bins_tuples = [(20,20,20)]
+#cpl_bins_tuples = [(30,30,30)]
+#plt.figure()
+#for cpl_bins in cpl_bins_tuples:
+#    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+#    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+#    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
+#plt.legend()
+
+#plt.figure()
+#for cpl_bins in cpl_bins_tuples:
+#    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+#    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+#    get_unique_parameter_sets(root_dir + cpl_marg_fname)
+#    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
+#plt.legend()
+
+cpl_smoothing = [0., 0.8, 1.]
 plt.figure()
-for cpl_bins in cpl_bins_tuples:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+for smoothing in cpl_smoothing:
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(40,40,40),smoothing=smoothing)
     cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
+    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing))
+
+for smoothing in cpl_smoothing:
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20),smoothing=smoothing)
+    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing)+'20')
+
 plt.legend()
 
 plt.figure()
-for cpl_bins in cpl_bins_tuples:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
+for smoothing in cpl_smoothing:
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(40,40,40),smoothing=smoothing)
     cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    get_unique_parameter_sets(root_dir + cpl_marg_fname)
-    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
+    #get_unique_parameter_sets(root_dir + cpl_marg_fname)
+    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing))
+
+for smoothing in cpl_smoothing:
+    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20),smoothing=smoothing)
+    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
+    #get_unique_parameter_sets(root_dir + cpl_marg_fname)
+    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing)+ '20')
 plt.legend()
+
+
 
 
 '''

@@ -38,7 +38,7 @@ class Deltamu(object):
 	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
 		redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
 		tolerance = 0.005, bins_tuple=(20,20,20), do_marg=False, redshift_marg_min=0.1,\
-		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla'):
+		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla',smoothing=0.):
 
 		self.chain_name = chain_name
 		self.cosmology_string = cosmology_string
@@ -53,6 +53,7 @@ class Deltamu(object):
 		self.redshift_marg_max = redshift_marg_max
 		self.redshift_marg_n = redshift_marg_n
 		self.redshifts_marg_method = redshifts_marg_method
+		self.smoothing = smoothing
 
 		if self.do_marg:
 			if self.redshifts_marg_method == 'lin':
@@ -72,12 +73,12 @@ class Deltamu(object):
 		if self.do_marg:
 			if self.chain_name == 'lcdm':
 				f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
-				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + "_marg_" +\
+				"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple) + "_marg_" +\
 				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
 			else:
 				f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
-				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
+				"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple[0]) + \
 				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg_" +\
 				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
@@ -105,10 +106,11 @@ class Deltamu(object):
 
 		if self.chain_name == 'lcdm':
 			f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
-			"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + ".dat"
+			"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple) + ".dat"
+
 		else:
 			f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
-			"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
+			"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple[0]) + \
 			str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + ".dat"
 
 		parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=0.)
@@ -123,12 +125,12 @@ class Deltamu(object):
 		if self.do_marg:
 			if self.chain_name == 'lcdm':
 				f_name = "deltamu_lcdm_c" + str(self.contour_level) +\
-				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple) + "_marg_" +\
+				"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple) + "_marg_" +\
 				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
 			else:
 				f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
-				"_t" + str(self.tolerance) + "_b" + str(self.bins_tuple[0]) + \
+				"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple[0]) + \
 				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg_" +\
 				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
@@ -209,9 +211,9 @@ class Deltamu(object):
 		'''Returns parameter sets on contour of given cosmology
 		'''
 		if self.chain_name == 'lcdm':
-			Parameter_contour = Contour.LCDM_Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple)
+			Parameter_contour = Contour.LCDM_Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple,self.smoothing)
 		else:
-			Parameter_contour = Contour.Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple)
+			Parameter_contour = Contour.Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple,self.smoothing)
 
 		print "Does", self.chain_name ,"contour exist?",
 		if Parameter_contour.test_contour_exists():
@@ -256,6 +258,11 @@ if __name__ == "__main__":
 	#	Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=cpl_bins, do_marg=True)
 	#	Deltamu_cpl.write_minmax_deltamuparameters()
 
+	cpl_smoothing = [0., 0.6, 0.8, 1.]
+	for smoothing in cpl_smoothing:
+		Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=(40,40,40), do_marg=True,smoothing=smoothing)
+		Deltamu_cpl.write_minmax_deltamuparameters()
+
 	#jbp_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
 	#for jbp_bins in jbp_bins_tuples:
 	#	Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=jbp_bins, do_marg=True)
@@ -266,10 +273,10 @@ if __name__ == "__main__":
 	#	Deltamu_n3cpl = Deltamu('n3cpl', n3cpl_string, bins_tuple=n3cpl_bins, do_marg=True)
 	#	Deltamu_n3cpl.write_minmax_deltamuparameters()
 
-	n7cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
-	for n7cpl_bins in n7cpl_bins_tuples:
-		Deltamu_n7cpl = Deltamu('n7cpl', n7cpl_string, bins_tuple=n7cpl_bins, do_marg=True)
-		Deltamu_n7cpl.write_minmax_deltamuparameters()
+	#n7cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
+	#for n7cpl_bins in n7cpl_bins_tuples:
+	#	Deltamu_n7cpl = Deltamu('n7cpl', n7cpl_string, bins_tuple=n7cpl_bins, do_marg=True)
+	#	Deltamu_n7cpl.write_minmax_deltamuparameters()
 
 	lcdm_bins_tuples = [50,60,70,80,90,100,110,120,130]
 	#for lcdm_bins in lcdm_bins_tuples:
