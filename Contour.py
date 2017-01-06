@@ -200,6 +200,9 @@ class Contour(object):
         fig_scatter = plt.figure()
         ax_scatter = fig_scatter.add_subplot(111, projection='3d')
         ax_scatter.scatter(x_contour, y_contour, z_contour)
+        ax_scatter.set_xlabel(labels[0])
+        ax_scatter.set_ylabel(labels[1])
+        ax_scatter.set_zlabel(labels[2])
         #plt.show()
 
 
@@ -318,10 +321,10 @@ if __name__ == "__main__":
     #JBP_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #JBP_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
-    LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
+    #LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
     #LCDM_Contour.pickle_contour()
     #print LCDM_Contour.test_contour_exists()
-    LCDM_Contour.plot_contour()
+    #LCDM_Contour.plot_contour()
     '''
     cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60),(70,70,70),(80,80,80)]
     for cpl_bins in cpl_bins_tuples:
@@ -360,9 +363,9 @@ if __name__ == "__main__":
     #n3CPL_Contour.plot_contour_3d()
     #n3CPL_Contour.plot_contour_slice()
 
-    #n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
+    n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
     #n3CPL_Contour.pickle_contour()
-    #n3CPL_Contour.plot_contour_3d()
+    n3CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n3CPL_Contour.plot_contour_slice()
 
     #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001)
@@ -370,9 +373,9 @@ if __name__ == "__main__":
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()
 
-    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
+    n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
     #n7CPL_Contour.pickle_contour()
-    #n7CPL_Contour.plot_contour_3d()
+    n7CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n7CPL_Contour.plot_contour_slice()
 
     plt.show()

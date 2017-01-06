@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.optimize as opt
+from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pickle as pick
 import astropy.cosmology as cosmo
@@ -10,6 +11,7 @@ import Flatn3CPL
 import Flatn7CPL
 import time as ti
 
+'''
 def lin_interp_array(X,Y,X_interp):
     #X and Y are arrays to draw interpolated values from
     #X_interp is an array of values we wish to calculate interpoalted Y values for
@@ -28,15 +30,20 @@ def lin_interp_array(X,Y,X_interp):
             else:
                 Y_interp[j] = Y[i-1] + (Y[i]-Y[i-1]) * (X_interp[j] - X[i-1]) / (X[i] - X[i-1])
     return Y_interp
+ '''
 
 def chi2(m, redshifts, distmod, redshifts_marg, distmod_marg, sigma_marg):
-	return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
+	#return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
+	distmod_func = interp1d(redshifts,distmod)
+	return np.sum( (distmod_func(redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
+	
+	
 
 class Deltamu(object):
 	"""A contour class for 3d contours
 	"""
 	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
-		redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
+	    redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
 		tolerance = 0.005, bins_tuple=(20,20,20), do_marg=False, redshift_marg_min=0.1,\
 		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla',smoothing=0.):
 
@@ -244,14 +251,15 @@ if __name__ == "__main__":
 
 	t0 = ti.time()
 	
-	lcdm_bins = [70, 80, 90]
+	
+	lcdm_bins = [70, 80, 90, 100]
 	for bins in lcdm_bins:
-		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True)
+		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True,smoothing=0.6)
 		Deltamu_lcdm.write_minmax_deltamuparameters()
 	
 
 	'''
-	cpl_smoothing = [0., 0.6]
+	cpl_smoothing = [0.0, 0.3, 0.6]
 	cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in cpl_smoothing:
 		for bins in cpl_bins:
@@ -260,7 +268,7 @@ if __name__ == "__main__":
 	'''
 
 	'''
-	jbp_smoothing = [0., 0.6]
+	jbp_smoothing = [0.0, 0.3, 0.6]
 	jbp_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in jbp_smoothing:
 		for bins in jbp_bins:
@@ -269,7 +277,7 @@ if __name__ == "__main__":
 	'''
 
 	'''
-	n3cpl_smoothing = [0., 0.6]
+	n3cpl_smoothing = [0.0, 0.3, 0.6]
 	n3cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in n3cpl_smoothing:
 		for bins in n3cpl_bins:
@@ -286,6 +294,8 @@ if __name__ == "__main__":
 			Deltamu_n7cpl.write_minmax_deltamuparameters()
 	print "Classes done in:", ti.time() - t0, "seconds"
 	'''
+
+	print "Done in:", ti.time() - t0, "seconds"
 
 
 

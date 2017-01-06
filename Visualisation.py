@@ -99,22 +99,24 @@ def plot_max_deltamu(fname, title, legend_string=None):
 def plot_deltamu(fname, title, legend_string=None):
     redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
     #plt.figure()
-    print np.shape(deltamu)
-    print np.shape(deltamu)[1]
     for ii in np.arange(np.shape(deltamu)[1]):
         plt.plot(redshifts, deltamu[:,ii],label=legend_string)
     plt.title(title)
     plt.show()
 
-def oplot_deltamus(chain_name, bins,smoothings):
+def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005):
     plt.figure()
+    plt.ylim((-0.1,0.1))
+    plt.xlabel('Redshift')
+    plt.ylabel('Deltamu')
     for ii in np.arange(len(bins)):
         for jj in np.arange(len(smoothings)):
-            deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj])
+            deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj],tolerance=tolerance)
             fname = root_dir + deltamus.get_marg_file_name()
             redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
             for kk in np.arange(np.shape(deltamu)[1]):
-                plt.plot(redshifts, deltamu[:,kk])
+                #plt.plot(redshifts, deltamu[:,kk])
+                plt.plot(redshifts, deltamu[:,kk] + marg[kk] + 19.14820557)
     plt.title(chain_name)
 
 
@@ -145,8 +147,12 @@ root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(60,60,60),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 #plot_deltamu(root_dir + cpl_marg_fname,'cpl')
-oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.6])
-oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.2])
-oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.0])
+
+
+oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
+oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.0])
+oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
+oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
+oplot_deltamus('lcdm', [70,80,90,100],[0.6],tolerance=0.01)
 plt.show()
 
