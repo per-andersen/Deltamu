@@ -194,6 +194,9 @@ class Contour(object):
             self.pickle_contour()
             x_contour, y_contour, z_contour = self.read_pickled_contour()
         print len(x_contour)
+        print np.min(x_contour), np.max(x_contour)
+        print np.min(y_contour), np.max(y_contour)
+        print np.min(z_contour), np.max(z_contour)
         fig_scatter = plt.figure()
         ax_scatter = fig_scatter.add_subplot(111, projection='3d')
         ax_scatter.scatter(x_contour, y_contour, z_contour)
@@ -218,7 +221,7 @@ class LCDM_Contour(Contour):
     holds true for this particular case.
     """
 
-    def __init__(self, chain_name, directory, contour_level = 0.6827, tolerance = 0.01, bins_tuple=100,smoothing=0):
+    def __init__(self, chain_name, directory, contour_level = 0.6827, tolerance = 0.01, bins_tuple=100,smoothing=0.5):
         self.chain_name = chain_name
         self.directory = directory
         self.contour_level = contour_level
@@ -291,6 +294,8 @@ class LCDM_Contour(Contour):
     #These methods below use the pickled contours and do stuff with them
     def plot_contour(self, labels = ['x']):
         xbins, sigma = self.histogram_points()
+        x_contour = self.histogram_to_contours()
+        print x_contour
 
         plt.figure()
         plt.plot(xbins, -sigma)
@@ -313,10 +318,10 @@ if __name__ == "__main__":
     #JBP_Contour.plot_contour(labels=['omega_m','w0','wa'])
     #JBP_Contour.plot_contour_3d(labels=['omega_m','w0','wa'])
 
-    #LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
+    LCDM_Contour = LCDM_Contour(chain_name='lcdm', directory='/Users/perandersen/Data/HzSC/')
     #LCDM_Contour.pickle_contour()
     #print LCDM_Contour.test_contour_exists()
-    #LCDM_Contour.plot_contou0(5)
+    LCDM_Contour.plot_contour()
     '''
     cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40),(50,50,50),(60,60,60),(70,70,70),(80,80,80)]
     for cpl_bins in cpl_bins_tuples:
@@ -330,7 +335,7 @@ if __name__ == "__main__":
     #CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
     
-    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
+    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(60,60,60),tolerance = 0.001, smoothing=0.6)
     #CPL_Contour.pickle_contour()
     #CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
@@ -340,12 +345,17 @@ if __name__ == "__main__":
     #JBP_Contour.plot_contour_3d()
     #JBP_Contour.plot_contour_slice()
     
-    JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.4)
+    #JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.4)
     #JBP_Contour.pickle_contour()
-    JBP_Contour.plot_contour_3d()
-    JBP_Contour.plot_contour_slice()
+    #JBP_Contour.plot_contour_3d()
+    #JBP_Contour.plot_contour_slice()
 
-    #n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.)
+    #n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(60,60,60),tolerance = 0.001, smoothing = 0.6)
+    #n3CPL_Contour.pickle_contour()
+    #n3CPL_Contour.plot_contour_3d()
+    #n3CPL_Contour.plot_contour_slice()
+
+    #n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing = 0.6)
     #n3CPL_Contour.pickle_contour()
     #n3CPL_Contour.plot_contour_3d()
     #n3CPL_Contour.plot_contour_slice()
@@ -355,12 +365,12 @@ if __name__ == "__main__":
     #n3CPL_Contour.plot_contour_3d()
     #n3CPL_Contour.plot_contour_slice()
 
-    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.)
+    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001)
     #n7CPL_Contour.pickle_contour()
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()
 
-    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
+    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
     #n7CPL_Contour.pickle_contour()
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()

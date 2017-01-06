@@ -48,7 +48,7 @@ class CosmoMC_dao(object):
         param_names_file = [s for s in files if "paramnames" in s]
         
         if len(param_names_file) != 1:
-            print "Too many parameter name files!"
+            print "Too few or too many parameter name files!"
             raise
         
         param_names_file = param_names_file[0]
@@ -130,7 +130,6 @@ if __name__ == "__main__":
     cosmomc_lcdm = CosmoMC_dao('lcdm', '/Users/perandersen/Data/HzSC/Chains/LCDM/')
     cosmomc_cpl = CosmoMC_dao('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/')
     cosmomc_jbp = CosmoMC_dao('jbp', '/Users/perandersen/Data/HzSC/Chains/JBP/')
-    cosmomc_jbp_ns = CosmoMC_dao('jbp-ns', '/Users/perandersen/Data/HzSC/Chains/JBP-ns/')
     cosmomc_n3cpl = CosmoMC_dao('n3cpl', '/Users/perandersen/Data/HzSC/Chains/n3CPL/')
     cosmomc_n7cpl = CosmoMC_dao('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/')
 
@@ -171,10 +170,9 @@ if __name__ == "__main__":
     
 
     '''Below tests writing and reading data'''
-    #cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
-    #cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
-    #cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
-    cosmomc_jbp_ns.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp-ns_chains.pkl')
+    cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
+    cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
+    cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
     cosmomc_n3cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n3cpl_chains.pkl')
     cosmomc_n7cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n7cpl_chains.pkl')
     

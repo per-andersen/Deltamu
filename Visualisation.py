@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
 import pickle as pick
 import Contour
 import Deltamu
@@ -75,7 +76,8 @@ def get_file_name(chain_name, bins_tuple, contour_level=0.68, tolerance=0.005, d
     return f_name
 
 def plot_minmax_deltamu(fname, title, legend_string=None):
-    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
+    #redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
+    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
     #plt.figure()
     plt.plot(redshifts, deltamu_min,label=legend_string)
     plt.plot(redshifts, deltamu_max)
@@ -83,148 +85,68 @@ def plot_minmax_deltamu(fname, title, legend_string=None):
     plt.show()
 
 def plot_min_deltamu(fname, title, legend_string=None):
-    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
+    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
     #plt.figure()
     plt.plot(redshifts, deltamu_min,label=legend_string)
     plt.title(title)
 
 def plot_max_deltamu(fname, title, legend_string=None):
-    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
+    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
     #plt.figure()
     plt.plot(redshifts, deltamu_max,label=legend_string)
     plt.title(title)
 
+def plot_deltamu(fname, title, legend_string=None):
+    redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
+    #plt.figure()
+    print np.shape(deltamu)
+    print np.shape(deltamu)[1]
+    for ii in np.arange(np.shape(deltamu)[1]):
+        plt.plot(redshifts, deltamu[:,ii],label=legend_string)
+    plt.title(title)
+    plt.show()
+
+def oplot_deltamus(chain_name, bins,smoothings):
+    plt.figure()
+    for ii in np.arange(len(bins)):
+        for jj in np.arange(len(smoothings)):
+            deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj])
+            fname = root_dir + deltamus.get_marg_file_name()
+            redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg = read_pickled_deltamu(fname)
+            for kk in np.arange(np.shape(deltamu)[1]):
+                plt.plot(redshifts, deltamu[:,kk])
+    plt.title(chain_name)
+
+
+def oplot_3d_contours():
+    '''
+    This function tests if the contours produced with different binning
+    and smoothing settings agree visually. It is really messy, and could
+    use some cleaning up, if it is to be used more than just the one time.
+    '''
+    CPL_Contour = Contour.Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
+    #CPL_Contour_2 = Contour.Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
+    CPL_Contour_2 = Contour.Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(60,60,60),tolerance = 0.001, smoothing=0.6)
+    CPL_Contour_3 = Contour.Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(50,50,50),tolerance = 0.001, smoothing=0.6)
+    x_contour, y_contour, z_contour = CPL_Contour.read_pickled_contour()
+    x_contour_2, y_contour_2, z_contour_2 = CPL_Contour_2.read_pickled_contour()
+    x_contour_3, y_contour_3, z_contour_3 = CPL_Contour_3.read_pickled_contour()
+    print len(x_contour)
+    print len(x_contour_2)
+    print len(x_contour_3)
+    fig_scatter = plt.figure()
+    ax_scatter = fig_scatter.add_subplot(111, projection='3d')
+    #ax_scatter.scatter(x_contour, y_contour, z_contour, color='g')
+    ax_scatter.scatter(x_contour_2, y_contour_2, z_contour_2)
+    ax_scatter.scatter(x_contour_3, y_contour_3, z_contour_3, color='r')
+
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-lcdm_fname = get_file_name(chain_name='lcdm',bins_tuple=100,tolerance=0.01)
-jbp_fname = get_file_name(chain_name='jbp',bins_tuple=(20,20,20))
-cpl_fname = get_file_name(chain_name='cpl',bins_tuple=(20,20,20))
-
-deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20))
+deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(60,60,60),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-
-#get_unique_parameter_sets(root_dir + lcdm_fname)
-#get_unique_parameter_sets(root_dir + cpl_fname)
-#plot_minmax_deltamu(root_dir + lcdm_fname, 'lcdm')
-#plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
-#plot_minmax_deltamu(root_dir + jbp_fname, 'jbp')
-
-#plot_minmax_deltamu(root_dir + lcdm_fname, 'lcdm')
-#plot_minmax_deltamu(root_dir + lcdm_marg_fname, 'lcdm')
-#plot_minmax_deltamu(root_dir + jbp_fname, 'jbp')
-#plot_minmax_deltamu(root_dir + jbp_marg_fname, 'jbp')
-#plot_minmax_deltamu(root_dir + cpl_fname, 'cpl')
-#plot_minmax_deltamu(root_dir + cpl_marg_fname, 'cpl')
-
-
-#cpl_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
-#cpl_bins_tuples = [(30,30,30)]
-#plt.figure()
-#for cpl_bins in cpl_bins_tuples:
-#    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
-#    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-#    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
-#plt.legend()
-
-#plt.figure()
-#for cpl_bins in cpl_bins_tuples:
-#    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=cpl_bins)
-#    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-#    get_unique_parameter_sets(root_dir + cpl_marg_fname)
-#    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(cpl_bins[0]))
-#plt.legend()
-
-cpl_smoothing = [0., 0.8, 1.]
-plt.figure()
-for smoothing in cpl_smoothing:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(40,40,40),smoothing=smoothing)
-    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing))
-
-for smoothing in cpl_smoothing:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20),smoothing=smoothing)
-    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    plot_min_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing)+'20')
-
-plt.legend()
-
-plt.figure()
-for smoothing in cpl_smoothing:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(40,40,40),smoothing=smoothing)
-    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    #get_unique_parameter_sets(root_dir + cpl_marg_fname)
-    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing))
-
-for smoothing in cpl_smoothing:
-    deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(20,20,20),smoothing=smoothing)
-    cpl_marg_fname = deltamu_cpl.get_marg_file_name()
-    #get_unique_parameter_sets(root_dir + cpl_marg_fname)
-    plot_max_deltamu(root_dir + cpl_marg_fname, 'cpl', legend_string=str(smoothing)+ '20')
-plt.legend()
-
-
-
-
-'''
-jbp_bins_tuples = [(20,20,20),(30,30,30),(40,40,40)]
-plt.figure()
-for jbp_bins in jbp_bins_tuples:
-    deltamu_jbp = Deltamu.Deltamu('jbp','',do_marg=True,bins_tuple=jbp_bins)
-    jbp_marg_fname = deltamu_jbp.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + jbp_marg_fname)
-    plot_min_deltamu(root_dir + jbp_marg_fname, 'jbp', legend_string=str(jbp_bins[0]))
-plt.legend()
-
-plt.figure()
-for jbp_bins in jbp_bins_tuples:
-    deltamu_jbp = Deltamu.Deltamu('jbp','',do_marg=True,bins_tuple=jbp_bins)
-    jbp_marg_fname = deltamu_jbp.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + jbp_marg_fname)
-    plot_max_deltamu(root_dir + jbp_marg_fname, 'jbp', legend_string=str(jbp_bins[0]))
-plt.legend()
-'''
-
-'''
-n3cpl_bins_tuples = [(20,20,20),(30,30,30)]
-plt.figure()
-for n3cpl_bins in n3cpl_bins_tuples:
-    deltamu_n3cpl = Deltamu.Deltamu('n3cpl','',do_marg=True,bins_tuple=n3cpl_bins)
-    n3cpl_marg_fname = deltamu_n3cpl.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + n3cpl_marg_fname)
-    plot_min_deltamu(root_dir + n3cpl_marg_fname, 'n3cpl', legend_string=str(n3cpl_bins[0]))
-plt.legend()
-
-plt.figure()
-for n3cpl_bins in n3cpl_bins_tuples:
-    deltamu_n3cpl = Deltamu.Deltamu('n3cpl','',do_marg=True,bins_tuple=n3cpl_bins)
-    n3cpl_marg_fname = deltamu_n3cpl.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + n3cpl_marg_fname)
-    plot_max_deltamu(root_dir + n3cpl_marg_fname, 'n3cpl', legend_string=str(n3cpl_bins[0]))
-plt.legend()
-'''
-'''
-n7cpl_bins_tuples = [(20,20,20)]
-plt.figure()
-for n7cpl_bins in n7cpl_bins_tuples:
-    deltamu_n7cpl = Deltamu.Deltamu('n7cpl','',do_marg=True,bins_tuple=n7cpl_bins)
-    n7cpl_marg_fname = deltamu_n7cpl.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + n7cpl_marg_fname)
-    plot_min_deltamu(root_dir + n7cpl_marg_fname, 'n7cpl', legend_string=str(n7cpl_bins[0]))
-plt.legend()
-
-plt.figure()
-for n7cpl_bins in n7cpl_bins_tuples:
-    deltamu_n7cpl = Deltamu.Deltamu('n7cpl','',do_marg=True,bins_tuple=n7cpl_bins)
-    n7cpl_marg_fname = deltamu_n7cpl.get_marg_file_name()
-    #print get_unique_parameter_sets(root_dir + n7cpl_marg_fname)
-    plot_max_deltamu(root_dir + n7cpl_marg_fname, 'n7cpl', legend_string=str(n7cpl_bins[0]))
-plt.legend()
-'''
-
-#lcdm_bins_tuples = [50,70,90,110,120,130]
-#for lcdm_bins in lcdm_bins_tuples:
-#    lcdm_fname = get_file_name(chain_name='lcdm',bins_tuple=lcdm_bins)
-#    plot_min_deltamu(root_dir + lcdm_fname, 'lcdm', legend_string=str(lcdm_bins))
-#plt.legend()
+#plot_deltamu(root_dir + cpl_marg_fname,'cpl')
+oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.6])
+oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.2])
+oplot_deltamus('cpl', [(60,60,60), (50,50,50), (40,40,40), (30,30,30)],[0.0])
 plt.show()
 

@@ -116,7 +116,7 @@ class Deltamu(object):
 		parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=0.)
 
 		print "Dumping data to file", f_name
-		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
+		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg
 		data_file_name = self.directory + "Deltamu/" + f_name
 		output = open(data_file_name,'wb')
 		pick.dump(data_dump,output)
@@ -138,7 +138,7 @@ class Deltamu(object):
 			parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=self.marg-self.m_bestfit_lcdm_marg)
 
 			print "Dumping data to file", f_name
-			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max
+			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg
 			data_file_name = self.directory + "Deltamu/"+ f_name
 			output = open(data_file_name,'wb')
 			pick.dump(data_dump,output)
@@ -243,16 +243,16 @@ if __name__ == "__main__":
 	n7cpl_string = 'cosmology=Flatn7CPL.Flatn7CPL(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
 	t0 = ti.time()
-	'''
-	lcdm_bins = [70, 80, 90, 100, 110, 120]
+	
+	lcdm_bins = [70, 80, 90]
 	for bins in lcdm_bins:
 		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True)
 		Deltamu_lcdm.write_minmax_deltamuparameters()
-	'''
+	
 
 	'''
-	cpl_smoothing = [0., 0.2, 0.4, 0.6]
-	cpl_bins = [(20,20,20),(30,30,30),(40,40,40)]
+	cpl_smoothing = [0., 0.6]
+	cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in cpl_smoothing:
 		for bins in cpl_bins:
 			Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=bins, do_marg=True,smoothing=smoothing)
@@ -260,23 +260,24 @@ if __name__ == "__main__":
 	'''
 
 	'''
-	jbp_smoothing = [0., 0.2, 0.4, 0.6]
-	jbp_bins = [(20,20,20),(30,30,30),(40,40,40)]
+	jbp_smoothing = [0., 0.6]
+	jbp_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in jbp_smoothing:
 		for bins in jbp_bins:
-			Deltamu_jbp = Deltamu('jbp', jbp_string, tolerance=0.01, bins_tuple=bins, do_marg=True, smoothing=smoothing)
+			Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_jbp.write_minmax_deltamuparameters()
 	'''
 
 	'''
-	n3cpl_smoothing = [0., 0.2, 0.4]
-	n3cpl_bins = [(20,20,20),(30,30,30),(40,40,40)]
+	n3cpl_smoothing = [0., 0.6]
+	n3cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in n3cpl_smoothing:
 		for bins in n3cpl_bins:
 			Deltamu_n3cpl = Deltamu('n3cpl', n3cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n3cpl.write_minmax_deltamuparameters()
 	'''
 
+	'''
 	n7cpl_smoothing = [0., 0.2, 0.4]
 	n7cpl_bins = [(20,20,20),(30,30,30),(40,40,40)]
 	for smoothing in n7cpl_smoothing:
@@ -284,6 +285,7 @@ if __name__ == "__main__":
 			Deltamu_n7cpl = Deltamu('n7cpl', n7cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n7cpl.write_minmax_deltamuparameters()
 	print "Classes done in:", ti.time() - t0, "seconds"
+	'''
 
 
 
