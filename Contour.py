@@ -78,44 +78,125 @@ class Contour(object):
         print x_contour
         return x_contour, y_contour, z_contour
 
-    def histogram_to_contours_paths(self):
+    def histogram_to_contours_paths(self, all_directions=True):
         '''
         This is an alternative to the first version of 'histogram_to_contours'
-        where we use the get_paths() method to get the 
+        where we use the get_paths() method to get the contours
         '''
         xbins, ybins, zbins, sigma = self.histogram_points()
-        nbins = len(xbins)
         
         x_save = np.array([])
         y_save = np.array([])
         z_save = np.array([])
 
-        fig3, ax3 = plt.subplots()
-        for ii in np.arange(nbins):
-            cs = ax3.contour(xbins, ybins, sigma[:,:,ii].T,levels=[self.contour_level])
-            go = 1
-            path_number = 0
-            while (go == 1):
-                try:
-                    p = cs.collections[0].get_paths()[path_number]
-                    v = p.vertices
-                    xx = v[:,0]
-                    yy = v[:,1]
-                    plt.plot(xx,yy,'bx')
-                    path_number += 1
-                    for jj in np.arange(len(xx)):
-                        #print xx[jj], yy[jj], zbins[ii]
-                        x_save = np.append(x_save,xx[jj])
-                        y_save = np.append(y_save,yy[jj])
-                        z_save = np.append(z_save,zbins[ii])
-                except:
-                    go = 0
-            print "i:", ii, " paths:", path_number, " z:", zbins[ii]
-            #plt.show()
-        plt.clf()
-        plt.close()
+        if all_directions:
+            
+            fig1, ax1 = plt.subplots()
+            for ii in np.arange(len(zbins)):
+                cs = ax1.contour(xbins, ybins, sigma[:,:,ii].T,levels=[self.contour_level])
+                go = 1
+                path_number = 0
+                while (go == 1):
+                    try:
+                        p = cs.collections[0].get_paths()[path_number]
+                        v = p.vertices
+                        xx = v[:,0]
+                        yy = v[:,1]
+                        #plt.plot(xx,yy,'bx')
+                        path_number += 1
+                        for jj in np.arange(len(xx)):
+                            #print xx[jj], yy[jj], zbins[ii]
+                            x_save = np.append(x_save,xx[jj])
+                            y_save = np.append(y_save,yy[jj])
+                            z_save = np.append(z_save,zbins[ii])
+                    except:
+                        go = 0
+                #print "i:", ii, " paths:", path_number, " z:", zbins[ii]
+            plt.clf()
+            plt.close()
 
-        return x_save, y_save, z_save 
+            fig3, ax3 = plt.subplots()
+            for ii in np.arange(len(ybins)):
+                cst = ax3.contour(xbins, zbins, sigma[:,ii,:].T,levels=[self.contour_level])
+                go = 1
+                path_number = 0
+                while (go == 1):
+                    try:
+                        p = cst.collections[0].get_paths()[path_number]
+                        v = p.vertices
+                        xx = v[:,0]
+                        zz = v[:,1]
+                        #plt.plot(xx,zz,'bx')
+                        #plt.show()
+                        path_number += 1
+                        for jj in np.arange(len(xx)):
+                            #print xx[jj], yy[jj], zbins[ii]
+                            x_save = np.append(x_save,xx[jj])
+                            y_save = np.append(y_save,ybins[ii])
+                            z_save = np.append(z_save,zz[jj])
+                    except:
+                        go = 0
+                #print "i:", ii, " paths:", path_number, " y:", ybins[ii]
+            plt.clf()
+            plt.close()
+            
+            
+            fig2, ax2 = plt.subplots()
+            for ii in np.arange(len(xbins)):
+                cst = ax2.contour(ybins, zbins, sigma[ii,:,:].T,levels=[self.contour_level])
+                go = 1
+                path_number = 0
+                while (go == 1):
+                    try:
+                        p = cst.collections[0].get_paths()[path_number]
+                        v = p.vertices
+                        yy = v[:,0]
+                        zz = v[:,1]
+                        #plt.plot(yy,zz,'bx')
+                        #plt.show()
+                        path_number += 1
+                        for jj in np.arange(len(yy)):
+                            #print xx[jj], yy[jj], zbins[ii]
+                            x_save = np.append(x_save,xbins[ii])
+                            y_save = np.append(y_save,yy[jj])
+                            z_save = np.append(z_save,zz[jj])
+                    except:
+                        go = 0
+                #print "i:", ii, " paths:", path_number, " y:", ybins[ii]
+            plt.clf()
+            plt.close()
+            
+            
+            print len(x_save), len(y_save), len(z_save)
+            return x_save, y_save, z_save
+
+        else:
+            fig3, ax3 = plt.subplots()
+            for ii in np.arange(len(xbins)):
+                cs = ax3.contour(xbins, ybins, sigma[:,:,ii].T,levels=[self.contour_level])
+                go = 1
+                path_number = 0
+                while (go == 1):
+                    try:
+                        p = cs.collections[0].get_paths()[path_number]
+                        v = p.vertices
+                        xx = v[:,0]
+                        yy = v[:,1]
+                        #plt.plot(xx,yy,'bx')
+                        path_number += 1
+                        for jj in np.arange(len(xx)):
+                            #print xx[jj], yy[jj], zbins[ii]
+                            x_save = np.append(x_save,xx[jj])
+                            y_save = np.append(y_save,yy[jj])
+                            z_save = np.append(z_save,zbins[ii])
+                    except:
+                        go = 0
+                #print "i:", ii, " paths:", path_number, " z:", zbins[ii]
+                #plt.show()
+            plt.clf()
+            plt.close()
+            print len(x_save), len(y_save), len(z_save)
+            return x_save, y_save, z_save 
 
     def pickle_contour(self):
         x_contour, y_contour, z_contour = self.histogram_to_contours_paths()
@@ -193,7 +274,7 @@ class Contour(object):
         except:
             self.pickle_contour()
             x_contour, y_contour, z_contour = self.read_pickled_contour()
-        print len(x_contour)
+        print len(x_contour), len(y_contour), len(z_contour)
         print np.min(x_contour), np.max(x_contour)
         print np.min(y_contour), np.max(y_contour)
         print np.min(z_contour), np.max(z_contour)
@@ -338,9 +419,9 @@ if __name__ == "__main__":
     #CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
     
-    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(60,60,60),tolerance = 0.001, smoothing=0.6)
+    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
     #CPL_Contour.pickle_contour()
-    #CPL_Contour.plot_contour_3d()
+    CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
 
     #JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001)
@@ -363,9 +444,9 @@ if __name__ == "__main__":
     #n3CPL_Contour.plot_contour_3d()
     #n3CPL_Contour.plot_contour_slice()
 
-    n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
+    #n3CPL_Contour = Contour(chain_name='n3cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
     #n3CPL_Contour.pickle_contour()
-    n3CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
+    #n3CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n3CPL_Contour.plot_contour_slice()
 
     #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001)
@@ -373,9 +454,9 @@ if __name__ == "__main__":
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()
 
-    n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
+    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
     #n7CPL_Contour.pickle_contour()
-    n7CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
+    #n7CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n7CPL_Contour.plot_contour_slice()
 
     plt.show()

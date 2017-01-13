@@ -146,7 +146,7 @@ def plot_3d_contours(chain_name, bins, smoothing, tolerance=0.005,labels = ['x',
         contour.pickle_contour()
         x_contour, y_contour, z_contour = contour.read_pickled_contour()
 
-    ax_scatter.scatter(x_contour, y_contour, z_contour,color='b',s=1.,depthshade=False)
+    ax_scatter.scatter(x_contour, y_contour, z_contour,color='b',s=1.,depthshade=True)
     for ii in np.arange(len(bins)):
         deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothing,tolerance=tolerance)
         fname = root_dir + deltamus.get_marg_file_name()
@@ -218,13 +218,12 @@ root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
-plot_3d_contours('jbp', [(50,50,50)], 0.6)
+#plot_3d_contours('jbp', [(50,50,50)], 0.6)
 
 
 #oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
-#oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.0])
 #oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
-#oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
+oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6])
 #oplot_deltamus('lcdm', [70,80,90,100],[0.6],tolerance=0.01)
 plt.show()
 

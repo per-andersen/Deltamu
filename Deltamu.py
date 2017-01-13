@@ -251,15 +251,15 @@ if __name__ == "__main__":
 
 	t0 = ti.time()
 	
-	'''
+	
 	lcdm_bins = [70, 80, 90, 100]
 	for bins in lcdm_bins:
 		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True,smoothing=0.6)
 		Deltamu_lcdm.write_minmax_deltamuparameters()
-	'''
+	
 
 	
-	cpl_smoothing = [0.0, 0.3, 0.6]
+	cpl_smoothing = [0.6]
 	cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in cpl_smoothing:
 		for bins in cpl_bins:
@@ -267,23 +267,23 @@ if __name__ == "__main__":
 			Deltamu_cpl.write_minmax_deltamuparameters()
 	
 
-	'''
+	
 	jbp_smoothing = [0.0, 0.3, 0.6]
 	jbp_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in jbp_smoothing:
 		for bins in jbp_bins:
 			Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_jbp.write_minmax_deltamuparameters()
-	'''
+	
 
-	'''
+	
 	n3cpl_smoothing = [0.0, 0.3, 0.6]
 	n3cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in n3cpl_smoothing:
 		for bins in n3cpl_bins:
 			Deltamu_n3cpl = Deltamu('n3cpl', n3cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n3cpl.write_minmax_deltamuparameters()
-	'''
+	
 
 	'''
 	n7cpl_smoothing = [0., 0.2, 0.4]
