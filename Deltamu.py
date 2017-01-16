@@ -259,13 +259,13 @@ if __name__ == "__main__":
 	
 
 	
-	cpl_smoothing = [0.6]
+	cpl_smoothing = [0.0, 0.3, 0.6]
 	cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in cpl_smoothing:
 		for bins in cpl_bins:
 			Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=bins, do_marg=True,smoothing=smoothing)
 			Deltamu_cpl.write_minmax_deltamuparameters()
-	
+	'''
 
 	
 	jbp_smoothing = [0.0, 0.3, 0.6]
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 		for bins in n3cpl_bins:
 			Deltamu_n3cpl = Deltamu('n3cpl', n3cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n3cpl.write_minmax_deltamuparameters()
-	
+	'''
 
 	'''
 	n7cpl_smoothing = [0., 0.2, 0.4]

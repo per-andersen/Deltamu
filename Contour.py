@@ -167,7 +167,7 @@ class Contour(object):
             plt.close()
             
             
-            print len(x_save), len(y_save), len(z_save)
+            #print len(x_save), len(y_save), len(z_save)
             return x_save, y_save, z_save
 
         else:
@@ -195,7 +195,7 @@ class Contour(object):
                 #plt.show()
             plt.clf()
             plt.close()
-            print len(x_save), len(y_save), len(z_save)
+            #print len(x_save), len(y_save), len(z_save)
             return x_save, y_save, z_save 
 
     def pickle_contour(self):
