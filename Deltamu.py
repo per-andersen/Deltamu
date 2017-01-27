@@ -251,7 +251,6 @@ if __name__ == "__main__":
 
 	t0 = ti.time()
 	
-	
 	lcdm_bins = [70, 80, 90, 100]
 	for bins in lcdm_bins:
 		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True,smoothing=0.6)

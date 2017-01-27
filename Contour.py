@@ -102,7 +102,9 @@ class Contour(object):
                         v = p.vertices
                         xx = v[:,0]
                         yy = v[:,1]
+                        #print zbins[ii]
                         #plt.plot(xx,yy,'bx')
+                        #plt.show()
                         path_number += 1
                         for jj in np.arange(len(xx)):
                             #print xx[jj], yy[jj], zbins[ii]
@@ -126,6 +128,7 @@ class Contour(object):
                         v = p.vertices
                         xx = v[:,0]
                         zz = v[:,1]
+                        #print ybins[ii]
                         #plt.plot(xx,zz,'bx')
                         #plt.show()
                         path_number += 1
@@ -168,6 +171,9 @@ class Contour(object):
             
             
             #print len(x_save), len(y_save), len(z_save)
+            print np.min(x_save), np.max(x_save)
+            print np.min(y_save), np.max(y_save)
+            print np.min(z_save), np.max(z_save)
             return x_save, y_save, z_save
 
         else:
@@ -419,9 +425,9 @@ if __name__ == "__main__":
     #CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
     
-    CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
+    #CPL_Contour = Contour(chain_name='cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(40,40,40),tolerance = 0.001, smoothing=0.6)
     #CPL_Contour.pickle_contour()
-    CPL_Contour.plot_contour_3d()
+    #CPL_Contour.plot_contour_3d()
     #CPL_Contour.plot_contour_slice()
 
     #JBP_Contour = Contour(chain_name='jbp', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001)
@@ -454,7 +460,7 @@ if __name__ == "__main__":
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()
 
-    #n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.6)
+    n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(10,10,30),tolerance = 0.001, smoothing=0.4)
     #n7CPL_Contour.pickle_contour()
     #n7CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n7CPL_Contour.plot_contour_slice()
