@@ -11,29 +11,7 @@ import Flatn3CPL
 import Flatn7CPL
 import time as ti
 
-'''
-def lin_interp_array(X,Y,X_interp):
-    #X and Y are arrays to draw interpolated values from
-    #X_interp is an array of values we wish to calculate interpoalted Y values for
-    if (len(X) != len(Y)): #Sanity check
-        print "Mismatched input lengths!", exit()
-
-    Y_interp = np.zeros(len(X_interp)) #Storage of interpolated results
-    for j in np.arange(len(X_interp)):
-        i = 0
-        if ( (X_interp[j] > np.max(X)) or (X_interp[j] < np.min(X)) ):
-            print np.min(X), X_interp[j], np.max(X), "Interpolation Impossible!"
-        while (X[i] < X_interp[j]):
-            i += 1
-            if i == 0:
-                Y_interp[j] = Y[i] + (Y[i+1]-Y[i]) * (X_interp[j] - X[i]) / (X[i+1] - X[i])
-            else:
-                Y_interp[j] = Y[i-1] + (Y[i]-Y[i-1]) * (X_interp[j] - X[i-1]) / (X[i] - X[i-1])
-    return Y_interp
- '''
-
 def chi2(m, redshifts, distmod, redshifts_marg, distmod_marg, sigma_marg):
-	#return np.sum( (lin_interp_array(redshifts,distmod,redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
 	distmod_func = interp1d(redshifts,distmod)
 	return np.sum( (distmod_func(redshifts_marg) + m  - distmod_marg )**2 / sigma_marg**2 )
 	
@@ -45,7 +23,7 @@ class Deltamu(object):
 	def __init__(self, chain_name, cosmology_string, directory='/Users/perandersen/Data/HzSC/',\
 	    redshifts=np.linspace(0.001,10.,1000), sigmas_marg = None, contour_level = 0.68,\
 		tolerance = 0.005, bins_tuple=(20,20,20), do_marg=False, redshift_marg_min=0.1,\
-		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla',smoothing=0.):
+		redshift_marg_max=10., redshift_marg_n=10, redshifts_marg_method='jla',smoothing=0., testcase=False):
 
 		self.chain_name = chain_name
 		self.cosmology_string = cosmology_string
@@ -61,6 +39,7 @@ class Deltamu(object):
 		self.redshift_marg_n = redshift_marg_n
 		self.redshifts_marg_method = redshifts_marg_method
 		self.smoothing = smoothing
+		self.testcase = testcase
 
 		if self.do_marg:
 			if self.redshifts_marg_method == 'lin':
@@ -89,6 +68,9 @@ class Deltamu(object):
 				str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + "_marg_" +\
 				self.redshifts_marg_method +"_z" + str(self.redshift_marg_min) +\
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
+
+			if self.testcase:
+				f_name = "test_" + f_name
 			return f_name
 		else:
 			print "Not doing marginalisation this run!"
@@ -119,11 +101,13 @@ class Deltamu(object):
 			f_name = "deltamu_" + self.chain_name + "_c" + str(self.contour_level) +\
 			"_t" + str(self.tolerance) + "_s" + str(self.smoothing) + "_b" + str(self.bins_tuple[0]) + \
 			str(self.bins_tuple[1]) + str(self.bins_tuple[2]) + ".dat"
+		if self.testcase:
+			f_name = "test_" + f_name
 
 		parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=0.)
 
 		print "Dumping data to file", f_name
-		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg
+		data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg, self.m_bestfit_lcdm_marg
 		data_file_name = self.directory + "Deltamu/" + f_name
 		output = open(data_file_name,'wb')
 		pick.dump(data_dump,output)
@@ -143,9 +127,11 @@ class Deltamu(object):
 				"-" + str(self.redshift_marg_max) + "_n" + str(self.redshift_marg_n) + ".dat"
 
 			parameters_min, parameters_max, deltamu_min, deltamu_max = self.get_minmax_deltamuparameters(margi=self.marg-self.m_bestfit_lcdm_marg)
+			if self.testcase:
+				f_name = "test_" + f_name
 
 			print "Dumping data to file", f_name
-			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg
+			data_dump = self.redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, self.deltamu, self.marg, self.m_bestfit_lcdm_marg
 			data_file_name = self.directory + "Deltamu/"+ f_name
 			output = open(data_file_name,'wb')
 			pick.dump(data_dump,output)
@@ -249,13 +235,19 @@ if __name__ == "__main__":
 	n3cpl_string = 'cosmology=Flatn3CPL.Flatn3CPL(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 	n7cpl_string = 'cosmology=Flatn7CPL.Flatn7CPL(H0=hubble_const, Om0=parameter_sets[0][ii], w0=parameter_sets[1][ii], wa=parameter_sets[2][ii])'
 
+	cpl_test_string = 'cosmology=cosmo.Flatw0waCDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=-1., wa=0.)'
+	jbp_test_string = 'cosmology=FlatJBP.FlatJBP_CDM(H0=hubble_const, Om0=parameter_sets[0][ii], w0=-1., wa=0.)'
+	n3cpl_test_string = 'cosmology=Flatn3CPL.Flatn3CPL(H0=hubble_const, Om0=parameter_sets[0][ii], w0=-1., wa=0.)'
+	n7cpl_test_string = 'cosmology=Flatn7CPL.Flatn7CPL(H0=hubble_const, Om0=parameter_sets[0][ii], w0=-1., wa=0.)'
+
 	t0 = ti.time()
 	
+	'''
 	lcdm_bins = [70, 80, 90, 100]
 	for bins in lcdm_bins:
 		Deltamu_lcdm = Deltamu('lcdm',lcdm_string,tolerance = 0.01, bins_tuple=bins,do_marg=True,smoothing=0.6)
 		Deltamu_lcdm.write_minmax_deltamuparameters()
-	
+	'''
 
 	
 	cpl_smoothing = [0.0, 0.3, 0.6]
@@ -264,24 +256,30 @@ if __name__ == "__main__":
 		for bins in cpl_bins:
 			Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=bins, do_marg=True,smoothing=smoothing)
 			Deltamu_cpl.write_minmax_deltamuparameters()
-	'''
-
+			Deltamu_cpl_test = Deltamu('cpl', cpl_test_string, bins_tuple=bins, do_marg=True,smoothing=smoothing,testcase=True)
+			Deltamu_cpl_test.write_minmax_deltamuparameters()
 	
+
+	'''
 	jbp_smoothing = [0.0, 0.3, 0.6]
 	jbp_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in jbp_smoothing:
 		for bins in jbp_bins:
-			Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
-			Deltamu_jbp.write_minmax_deltamuparameters()
-	
+			#Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
+			#Deltamu_jbp.write_minmax_deltamuparameters()
+			Deltamu_jbp_test = Deltamu('jbp', jbp_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
+			Deltamu_jbp_test.write_minmax_deltamuparameters()
+	'''
 
-	
+	'''
 	n3cpl_smoothing = [0.0, 0.3, 0.6]
 	n3cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	for smoothing in n3cpl_smoothing:
 		for bins in n3cpl_bins:
 			Deltamu_n3cpl = Deltamu('n3cpl', n3cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n3cpl.write_minmax_deltamuparameters()
+			Deltamu_n3cpl_test = Deltamu('n3cpl', n3cpl_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
+			Deltamu_n3cpl_test.write_minmax_deltamuparameters()
 	'''
 
 	'''
