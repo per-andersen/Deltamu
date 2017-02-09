@@ -116,10 +116,12 @@ def plot_deltamu(fname, title, legend_string=None):
     plt.show()
 
 def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', thinning=10):
-    plt.figure()
+    if individual_plots:
+        plt.figure()
+        plt.xlabel('Redshift',size='x-large')
+        plt.ylabel(r'$\Delta \mu$',size='x-large')
+
     plt.ylim((-0.1,0.1))
-    plt.xlabel('Redshift')
-    plt.ylabel('Deltamu')
     ii_counter = 0
 
     deltamu_max_global = np.zeros(1000)
@@ -138,21 +140,22 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
             for kk in np.arange(np.shape(deltamu)[1]):
                 ii_counter += 1
                 if ii_counter == thinning:
-                    plt.plot(redshifts, deltamu[:,kk])
-                    #plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg)
+                    #plt.plot(redshifts, deltamu[:,kk])
+                    plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg)
                     ii_counter = 0
-    plt.plot(redshifts, deltamu[:,0],label=label)
+    #plt.plot(redshifts, deltamu[:,0],label=label)
     
-    #plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
-    #plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
+    plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
+    plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
 
     plt.legend(frameon=False)
 
 def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'):
-    plt.figure()
+    if individual_plots:
+        plt.figure()
+        plt.xlabel('Redshift',size='x-large')
+        plt.ylabel(r'$\Delta \mu$',size='x-large')
     plt.ylim((-0.1,0.1))
-    plt.xlabel('Redshift')
-    plt.ylabel('Deltamu')
 
     deltamu_max_global = np.zeros(1000)
     deltamu_min_global = np.zeros(1000)
@@ -285,21 +288,29 @@ def plot_equation_of_state(wa_1,wa_2):
     
     
 
+individual_plots = False
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
-#plot_3d_contours('n3cpl', [(50,50,50)], 0.6)
+#plot_3d_contours('n7cpl', [(30,30,30)], 0.4)
 
-oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
-oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
-oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
+if individual_plots == False:
+    f, (ax1, ax2, ax3) = plt.subplots(3,2,sharex=True, sharey=True,figsize=(10,5))
+
+plt.sca(ax1[0])
+oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
+#oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
+#oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
+#oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 #oplot_deltamus('lcdm', [70,80,90,100],[0.6],tolerance=0.01)
 
-#oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
+#plt.sca(ax1[1])
+oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
 #oplot_deltamu_test('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.3],label='n3CPL')
 #oplot_deltamu_test('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
+#oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([0.2, 0.3, 0.4],[0.8, 0.9, 1.])
 plt.show()

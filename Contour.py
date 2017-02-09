@@ -460,8 +460,8 @@ if __name__ == "__main__":
     #n7CPL_Contour.plot_contour_3d()
     #n7CPL_Contour.plot_contour_slice()
 
-    n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(10,10,30),tolerance = 0.001, smoothing=0.4)
-    #n7CPL_Contour.pickle_contour()
+    n7CPL_Contour = Contour(chain_name='n7cpl', directory='/Users/perandersen/Data/HzSC/',bins_tuple=(30,30,30),tolerance = 0.001, smoothing=0.4)
+    n7CPL_Contour.pickle_contour()
     #n7CPL_Contour.plot_contour_3d(labels=['omegam','w0','wa'])
     #n7CPL_Contour.plot_contour_slice()
 

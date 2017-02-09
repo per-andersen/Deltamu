@@ -34,16 +34,26 @@ def get_mean_std(chain_name, directory, fname):
 
 omegam, w0, wa = get_distributions('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/', 'n7cpl_chains.pkl')
 
-#plot_likelihoods('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/', 'n7cpl_chains.pkl',70)
-#plot_likelihoods('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/', 'cpl_chains.pkl',70)
 
-get_mean_std('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/', 'cpl_chains.pkl')
-get_mean_std('jbp', '/Users/perandersen/Data/HzSC/Chains/JBP/', 'jbp_chains.pkl')
-get_mean_std('n3cpl', '/Users/perandersen/Data/HzSC/Chains/n3CPL/', 'n3cpl_chains.pkl')
+#plot_likelihoods('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/', 'cpl_chains.pkl',50)
+#plot_likelihoods('jbp', '/Users/perandersen/Data/HzSC/Chains/JBP/', 'jbp_chains.pkl',50)
+#plot_likelihoods('n3cpl', '/Users/perandersen/Data/HzSC/Chains/n3CPL/', 'n3cpl_chains.pkl',50)
+plot_likelihoods('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/', 'n7cpl_chains.pkl',50)
 
-cosmomc_lcdm = dao.CosmoMC_dao('lcdm', '/Users/perandersen/Data/HzSC/Chains/LCDM/')
-data, data_labels = cosmomc_lcdm.read_pickled_chains(fname='lcdm_chains.pkl')
-print np.mean(data), np.std(data)
+#get_mean_std('cpl', '/Users/perandersen/Data/HzSC/Chains/CPL/', 'cpl_chains.pkl')
+#get_mean_std('jbp', '/Users/perandersen/Data/HzSC/Chains/JBP/', 'jbp_chains.pkl')
+#get_mean_std('n3cpl', '/Users/perandersen/Data/HzSC/Chains/n3CPL/', 'n3cpl_chains.pkl')
 
+#cosmomc_lcdm = dao.CosmoMC_dao('lcdm', '/Users/perandersen/Data/HzSC/Chains/LCDM/')
+#data, data_labels = cosmomc_lcdm.read_pickled_chains(fname='lcdm_chains.pkl')
+#print np.mean(data), np.std(data)
+
+cosmomc_n7cpl = dao.CosmoMC_dao('n7cpl', '/Users/perandersen/Data/HzSC/Chains/n7CPL/')
+data, data_labels = cosmomc_n7cpl.read_pickled_chains(fname='n7cpl_chains.pkl')
+
+#print data_labels
+print np.mean(data[:,0]), np.std(data[:,0])
+print np.mean(data[:,1]), np.std(data[:,1])
+print np.mean(data[:,2]), np.std(data[:,2])
 
 plt.show()

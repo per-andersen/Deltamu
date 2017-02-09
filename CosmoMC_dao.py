@@ -170,11 +170,11 @@ if __name__ == "__main__":
     
 
     '''Below tests writing and reading data'''
-    #cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
-    #cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
-    #cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
-    #cosmomc_n3cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n3cpl_chains.pkl')
-    cosmomc_n7cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n7cpl_chains.pkl')
+    cosmomc_lcdm.pickle_sliced_chains(indices=[29], fname='lcdm_chains.pkl')
+    cosmomc_cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='cpl_chains.pkl')
+    cosmomc_jbp.pickle_sliced_chains(indices=[31, 6, 7], fname='jbp_chains.pkl')
+    cosmomc_n3cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n3cpl_chains.pkl')
+    #cosmomc_n7cpl.pickle_sliced_chains(indices=[31, 6, 7], fname='n7cpl_chains.pkl')
     
     #data, data_labels = cosmomc_cpl.read_pickled_chains(fname='cpl_contours.pkl')
     #print cosmomc_cpl.get_parameter_names(indices=[31, 6, 7])
