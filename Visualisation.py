@@ -115,7 +115,7 @@ def plot_deltamu(fname, title, legend_string=None):
     plt.title(title)
     plt.show()
 
-def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', thinning=10):
+def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', thinning=10, ignore_k=False):
     if individual_plots:
         plt.figure()
         plt.xlabel('Redshift',size='x-large')
@@ -140,13 +140,16 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
             for kk in np.arange(np.shape(deltamu)[1]):
                 ii_counter += 1
                 if ii_counter == thinning:
-                    #plt.plot(redshifts, deltamu[:,kk])
-                    plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg)
+                    if ignore_k:
+                        plt.plot(redshifts, deltamu[:,kk])
+                    else:
+                        plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg)
                     ii_counter = 0
-    #plt.plot(redshifts, deltamu[:,0],label=label)
-    
-    plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
-    plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
+    if ignore_k:
+        plt.plot(redshifts, deltamu[:,0],label=label)
+    else:
+        plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
+        plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
 
     plt.legend(frameon=False)
 
@@ -181,7 +184,7 @@ def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'
                 if deltamu_min_test[kk] < deltamu_min_global_test[kk]:
                     deltamu_min_global_test[kk] = deltamu_min_test[kk]
     plt.fill_between(redshifts, deltamu_max_global,deltamu_min_global,color='b',label=label)
-    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='g',label=label + " test")
+    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='g',label=label + r", $w_0=-1, w_a=0$")
     plt.legend(frameon=False)
     #plt.plot(redshifts, deltamu_max_global,c='b')
     #plt.plot(redshifts, deltamu_min_global,c='b')
@@ -274,44 +277,146 @@ def oplot_3d_contours():
 def plot_equation_of_state(wa_1,wa_2):
     redshifts = np.linspace(0.0001,10.,1000)
     scale_factor = 1. / (1. + redshifts)
-    w0 = -1.
     linestyles = ['-','--','-.',':']
-    plt.figure()
+    fig = plt.figure()
+    plt.xlabel('Redshift',size='x-large')
+    plt.ylabel(r'$w(z)$',size='xx-large')
     for ii in np.arange(len(wa_1)):
-        eos_cpl = w0 + wa_1[ii]*(1.-scale_factor)
-        plt.plot(redshifts, eos_cpl,c='b',ls=linestyles[ii],lw=2)
+        eos_cpl = wa_1[ii][0] + wa_1[ii][1]*(1.-scale_factor)
+        plt.plot(redshifts, eos_cpl,c='b',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_1[ii][0]) + r', $w_a$ : ' + str(wa_1[ii][1]))
     for ii in np.arange(len(wa_2)):
-        eos_cpl = w0 + wa_2[ii]*((1.-scale_factor)**7)
-        plt.plot(redshifts, eos_cpl,c='g',ls=linestyles[ii],lw=2)
+        eos_cpl = wa_2[ii][0] + wa_2[ii][1]*((1.-scale_factor)**7)
+        plt.plot(redshifts, eos_cpl,c='g',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_2[ii][0]) + r', $w_a$ : ' + str(wa_2[ii][1]))
     plt.ylim((-1,-0.5))
-    
-    
-    
+    plt.legend(frameon=False, loc=2, fontsize=17)
+    plt.xticks(size='x-large')
+    plt.yticks(size='x-large')
+    fig.set_tight_layout('True')
+    plt.savefig('Figures/equationofstate.pdf',format='pdf')
 
-individual_plots = False
+def combined_plot():
+    f, (ax1, ax2, ax3) = plt.subplots(3,2,figsize=(8,10))
+    
+    plt.sca(ax1[0])
+    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=True,thinning=20)
+    ax1[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
+    ax1[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
+    ax1[0].set_xticks([0.])
+    ax1[0].set_xticklabels([''])
+    ax1[0].text(0.3,0.08,'(a)',size='x-large')
+    
+    plt.sca(ax1[1])
+    oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
+    ax1[1].set_yticks([0.])
+    ax1[1].set_yticklabels([''])
+    ax1[1].set_xticks([0.])
+    ax1[1].set_xticklabels([''])
+    ax1[1].text(0.3,0.08,'(b)',size='x-large')
+
+    plt.sca(ax2[0])
+    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=False,thinning=40)
+    ax2[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
+    ax2[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
+    ax2[0].set_xticks([0.])
+    ax2[0].set_xticklabels([''])
+    ax2[0].text(0.3,0.08,'(c)',size='x-large')
+
+    plt.sca(ax2[1])
+    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=False,thinning=40)
+    ax2[1].set_yticks([0.])
+    ax2[1].set_yticklabels([''])
+    ax2[1].set_xticks([0.])
+    ax2[1].set_xticklabels([''])
+    ax2[1].text(0.3,0.08,'(d)',size='x-large')
+
+    plt.sca(ax3[0])
+    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=False,thinning=40)
+    ax3[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
+    ax3[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
+    ax3[0].set_xlabel('Redshift',size='x-large')
+    ax3[0].text(0.3,0.08,'(e)',size='x-large')
+
+
+    plt.sca(ax3[1])
+    oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=False,thinning=40)
+    ax3[1].set_xlabel('Redshift',size='x-large')
+    ax3[1].set_yticks([0.])
+    ax3[1].set_yticklabels([''])
+    ax3[1].set_xticks([2,4,6,8,10])
+    ax3[1].text(0.3,0.08,'(f)',size='x-large')
+
+
+    plt.subplots_adjust(left=0.11,bottom=0.05,right=0.98,top=0.98,wspace=0., hspace=0.)
+    plt.savefig('Figures/combinedplot.pdf',format='pdf')
+
+def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, tolerance=0.005):
+    if individual_plots:
+        fig = plt.figure()
+        plt.xlabel('Redshift',size='x-large')
+        plt.ylabel(r'$\Delta \mu$',size='x-large')
+
+    deltamu_max_global = np.zeros((len(chain_names),1000))
+    deltamu_min_global = np.zeros((len(chain_names),1000))
+
+    colors = ['g', 'lawngreen', 'limegreen','b']
+    linestyles = ['-','--',':','-']
+    for ll in np.arange(len(chain_names)):
+        chain_name = chain_names[ll]
+        bins = bins_list[ll]
+        smoothings = smoothings_list[ll]
+        label = labels[ll]
+        color = colors[ll]
+        linestyle = linestyles[ll]
+        for ii in np.arange(len(bins)):
+            for jj in np.arange(len(smoothings)):
+                deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj],tolerance=tolerance)
+                fname = root_dir + deltamus.get_marg_file_name()
+                redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg, m_bestfit_lcdm_marg = read_pickled_deltamu(fname)
+                for kk in np.arange(len(deltamu_min_global[ll])):
+                    if deltamu_max[kk] > deltamu_max_global[ll][kk]:
+                        deltamu_max_global[ll][kk] = deltamu_max[kk]
+                    if deltamu_min[kk] < deltamu_min_global[ll][kk]:
+                        deltamu_min_global[ll][kk] = deltamu_min[kk]
+        plt.plot(redshifts, deltamu_max_global[ll],lw=3,label=label, color=color,ls=linestyle)
+        plt.plot(redshifts, deltamu_min_global[ll],lw=3,color=color,ls=linestyle)
+
+    plt.legend(frameon=False, loc=5, fontsize=20)
+    plt.ylim((-0.05,0.05))
+    plt.yticks([-0.05, -0.02, 0, 0.02, 0.05],size='x-large')
+    plt.xticks(size='x-large')
+
+    if individual_plots:
+        fig.set_tight_layout('True')
+        plt.savefig('Figures/deltamus_extrema.pdf',format='pdf')
+
+
+individual_plots = True
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
+oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
+[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
+[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
+
+#combined_plot()
+
 #plot_3d_contours('n7cpl', [(30,30,30)], 0.4)
 
-if individual_plots == False:
-    f, (ax1, ax2, ax3) = plt.subplots(3,2,sharex=True, sharey=True,figsize=(10,5))
-
-plt.sca(ax1[0])
-oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
+#oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=True,thinning=10)
 #oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
 #oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
 #oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 #oplot_deltamus('lcdm', [70,80,90,100],[0.6],tolerance=0.01)
 
 #plt.sca(ax1[1])
-oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
+#oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
 #oplot_deltamu_test('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.3],label='n3CPL')
 #oplot_deltamu_test('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
-#plot_equation_of_state([0.2, 0.3, 0.4],[0.8, 0.9, 1.])
-plt.show()
+#plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.8), (-1.,0.9), (-1.,1.)])
+#plt.show()
+
 
