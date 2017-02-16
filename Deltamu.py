@@ -250,28 +250,26 @@ if __name__ == "__main__":
 	'''
 
 	'''
-	#cpl_smoothing = [0.0, 0.3, 0.6]
-	#cpl_bins = [(30,30,30),(40,40,40),(50,50,50),(60,60,60)]
 	cpl_smoothing = [0.6]
 	cpl_bins = [(30,30,30),(40,40,40),(50,50,50)]
 	for smoothing in cpl_smoothing:
 		for bins in cpl_bins:
-			#Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=bins, do_marg=True,smoothing=smoothing)
-			#Deltamu_cpl.write_minmax_deltamuparameters()
+			Deltamu_cpl = Deltamu('cpl', cpl_string, bins_tuple=bins, do_marg=True,smoothing=smoothing)
+			Deltamu_cpl.write_minmax_deltamuparameters()
 			Deltamu_cpl_test = Deltamu('cpl', cpl_test_string, bins_tuple=bins, do_marg=True,smoothing=smoothing,testcase=True)
 			Deltamu_cpl_test.write_minmax_deltamuparameters()
 	'''
 
-	
+	'''
 	jbp_smoothing = [0.6]
 	jbp_bins = [(30,30,30),(40,40,40),(50,50,50)]
 	for smoothing in jbp_smoothing:
 		for bins in jbp_bins:
 			Deltamu_jbp = Deltamu('jbp', jbp_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_jbp.write_minmax_deltamuparameters()
-			#Deltamu_jbp_test = Deltamu('jbp', jbp_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
-			#Deltamu_jbp_test.write_minmax_deltamuparameters()
-	
+			Deltamu_jbp_test = Deltamu('jbp', jbp_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
+			Deltamu_jbp_test.write_minmax_deltamuparameters()
+	'''
 
 	'''
 	n3cpl_smoothing = [0.6]
@@ -284,17 +282,16 @@ if __name__ == "__main__":
 			Deltamu_n3cpl_test.write_minmax_deltamuparameters()
 	'''
 
-	'''
-	n7cpl_smoothing = [0.2, 0.4]
-	n7cpl_bins = [(20,20,20),(30,30,30),(40,40,40)]
-	#n7cpl_bins = [(10,10,20),(10,10,30)]
+	
+	n7cpl_smoothing = [0.4]
+	n7cpl_bins = [(20,20,20),(30,30,30),(40,40,40),(50,50,50)]
 	for smoothing in n7cpl_smoothing:
 		for bins in n7cpl_bins:
 			Deltamu_n7cpl = Deltamu('n7cpl', n7cpl_string, bins_tuple=bins, do_marg=True, smoothing=smoothing)
 			Deltamu_n7cpl.write_minmax_deltamuparameters()
-			#Deltamu_n7cpl_test = Deltamu('n7cpl', n7cpl_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
-			#Deltamu_n7cpl_test.write_minmax_deltamuparameters()
-	'''
+			Deltamu_n7cpl_test = Deltamu('n7cpl', n7cpl_test_string, bins_tuple=bins, do_marg=True, smoothing=smoothing,testcase=True)
+			Deltamu_n7cpl_test.write_minmax_deltamuparameters()
+	
 
 	print "Classes done in:", ti.time() - t0, "seconds"
 	

@@ -381,17 +381,20 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
         plt.plot(redshifts, deltamu_min_global[ll],lw=3,color=color,ls=linestyle)
 
     plt.legend(frameon=False, loc=5, fontsize=20)
-    plt.ylim((-0.05,0.05))
-    plt.yticks([-0.05, -0.02, 0, 0.02, 0.05],size='x-large')
+    plt.ylim((-0.06,0.06))
+    plt.yticks([-0.06, -0.03, 0, 0.03, 0.06],size='x-large')
     plt.xticks(size='x-large')
 
     if individual_plots:
         fig.set_tight_layout('True')
         plt.savefig('Figures/deltamus_extrema.pdf',format='pdf')
 
+root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 individual_plots = True
-root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
+#combined_plot()
+
+
 
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
@@ -399,8 +402,6 @@ cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
 [[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
 [[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
-
-#combined_plot()
 
 #plot_3d_contours('n7cpl', [(30,30,30)], 0.4)
 
