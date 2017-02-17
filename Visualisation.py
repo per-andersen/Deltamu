@@ -155,7 +155,7 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
 
 def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'):
     if individual_plots:
-        plt.figure()
+        fig = plt.figure()
         plt.xlabel('Redshift',size='x-large')
         plt.ylabel(r'$\Delta \mu$',size='x-large')
     plt.ylim((-0.1,0.1))
@@ -184,8 +184,9 @@ def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'
                 if deltamu_min_test[kk] < deltamu_min_global_test[kk]:
                     deltamu_min_global_test[kk] = deltamu_min_test[kk]
     plt.fill_between(redshifts, deltamu_max_global,deltamu_min_global,color='b',label=label)
-    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='g',label=label + r", $w_0=-1, w_a=0$")
+    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='g',hatch='X',label=label + r", $w_0=-1, w_a=0$")
     plt.legend(frameon=False)
+    plt.savefig('Figures/test.pdf',format='pdf',dpi=fig.dpi)
     #plt.plot(redshifts, deltamu_max_global,c='b')
     #plt.plot(redshifts, deltamu_min_global,c='b')
     #plt.plot(redshifts_test, deltamu_max_global_test,c='g')
@@ -391,8 +392,8 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = False
-combined_plot()
+individual_plots = True
+#combined_plot()
 
 
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
@@ -411,12 +412,12 @@ cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 #oplot_deltamus('lcdm', [70,80,90,100],[0.6],tolerance=0.01)
 
 #plt.sca(ax1[1])
-#oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
+oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
 #oplot_deltamu_test('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.3],label='n3CPL')
 #oplot_deltamu_test('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP')
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.8), (-1.,0.9), (-1.,1.)])
-#plt.show()
+plt.show()
 
 
