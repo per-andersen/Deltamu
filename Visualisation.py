@@ -391,19 +391,18 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = True
-#combined_plot()
-
+individual_plots = False
+combined_plot()
 
 
 deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
 cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
-oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
-[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
-[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
+#oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
+#[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
+#[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
 
-#plot_3d_contours('n7cpl', [(30,30,30)], 0.4)
+#plot_3d_contours('n7cpl', [(40,40,40)], 0.4)
 
 #oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=True,thinning=10)
 #oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
