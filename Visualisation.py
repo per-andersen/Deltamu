@@ -156,7 +156,8 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
         lmax.set_dashes(dashes)
         lmin.set_dashes(dashes)
 
-    plt.legend(frameon=False)
+    #plt.legend(frameon=False)
+    plt.text(7.5, 0.08, label,size='x-large')
 
 def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'):
     if individual_plots:
@@ -281,6 +282,7 @@ def oplot_3d_contours():
     ax_scatter.scatter(x_contour_2, y_contour_2, z_contour_2)
     ax_scatter.scatter(x_contour_3, y_contour_3, z_contour_3, color='r')
 
+'''
 def plot_equation_of_state(wa_1,wa_2):
     redshifts = np.linspace(0.0001,10.,1000)
     scale_factor = 1. / (1. + redshifts)
@@ -302,6 +304,31 @@ def plot_equation_of_state(wa_1,wa_2):
     #plt.text(6,-0.6,'Freezing\n  n7CPL',size='xx-large',color='g')
     plt.text(7.5,-0.8,'Thawing',size='xx-large',color='b')
     plt.text(6,-0.6,'Freezing',size='xx-large',color='g')
+    fig.set_tight_layout('True')
+    plt.savefig('Figures/equationofstate.pdf',format='pdf')
+'''
+
+def plot_equation_of_state(wa_1,wa_2):
+    redshifts = np.linspace(0.0001,10.,1000)
+    scale_factor = 1. / (1. + redshifts)
+    linestyles = ['-','--','-.',':']
+    fig = plt.figure()
+    plt.xlabel('Redshift',size='x-large')
+    plt.ylabel(r'$w(z)$',size='xx-large')
+    for ii in np.arange(len(wa_1)):
+        eos_cpl = wa_1[ii][0] + wa_1[ii][1]*(1.-scale_factor)
+        plt.plot(redshifts, eos_cpl,c='b',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_1[ii][0]) + r', $w_a$ : ' + str(wa_1[ii][1]))
+    for ii in np.arange(len(wa_2)):
+        eos_cpl = wa_2[ii][0] + wa_2[ii][1]*((1.-scale_factor)**7)
+        plt.plot(redshifts, eos_cpl,c='g',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_2[ii][0]) + r', $w_a$ : ' + str(wa_2[ii][1]))
+    plt.ylim((-1.5,-0.5))
+    plt.legend(frameon=False, loc=5, fontsize=17)
+    plt.xticks(size='x-large')
+    plt.yticks(size='x-large')
+    #plt.text(7.5,-0.8,'Thawing\n    CPL',size='xx-large',color='b')
+    #plt.text(6,-0.6,'Freezing\n  n7CPL',size='xx-large',color='g')
+    plt.text(.4,-0.75,'Steep slope',size='x-large',color='b',rotation=50)
+    plt.text(2.8,-1.,'Gentle slope',size='x-large',color='g')
     fig.set_tight_layout('True')
     plt.savefig('Figures/equationofstate.pdf',format='pdf')
 
@@ -458,12 +485,9 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 individual_plots = False
-#combined_plot()
-additional_plots()
+combined_plot()
+#additional_plots()
 
-
-deltamu_cpl = Deltamu.Deltamu('cpl','',do_marg=True,bins_tuple=(50,50,50),smoothing=0.6)
-cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 
 #oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
 #[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
@@ -484,6 +508,7 @@ cpl_marg_fname = deltamu_cpl.get_marg_file_name()
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.7), (-1.,0.8), (-1.,.9)])
+#plot_equation_of_state([(-1.,0.5), (-1.,-0.5)],[(-1.,0.5), (-1.,-0.5)])
 #plt.show()
 
 

@@ -56,4 +56,4 @@ print np.mean(data[:,0]), np.std(data[:,0])
 print np.mean(data[:,1]), np.std(data[:,1])
 print np.mean(data[:,2]), np.std(data[:,2])
 
-plt.show()
+plt.show() 
