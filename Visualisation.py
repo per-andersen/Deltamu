@@ -115,6 +115,33 @@ def plot_deltamu(fname, title, legend_string=None):
     plt.title(title)
     plt.show()
 
+def eos_from_chain_name(chain_name, w0, wa, redshifts):
+    scale_factor = 1. / (1. + redshifts)
+    if chain_name == 'cpl':
+        #print 'CPL'
+        return w0 + wa * (1. - scale_factor)
+    elif chain_name == 'jbp':
+        #print 'JBP'
+        return w0 + wa * (1. - scale_factor) * scale_factor
+    elif chain_name == 'n3cpl':
+        #print 'n3CPL'
+        return w0 + wa * (1. - scale_factor)**3
+    elif chain_name == 'n7cpl':
+        #print 'n7CPL'
+        return w0 + wa * (1. - scale_factor)**7
+    else:
+        print "STRANGER DANGER!"
+        exit()
+
+def is_phantom(chain_name, w0, wa, redshifts):
+    eos = eos_from_chain_name(chain_name, w0, wa, redshifts)
+    
+    if np.min(eos) < -1:
+        return True
+    else:
+        #print np.min(eos)
+        return False
+
 def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', thinning=10, ignore_k=False):
     if individual_plots:
         plt.figure()
@@ -132,26 +159,39 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
             deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj],tolerance=tolerance)
             fname = root_dir + deltamus.get_marg_file_name()
             redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg, m_bestfit_lcdm_marg = read_pickled_deltamu(fname)
+            parameters = deltamus.get_parameters(verbose=False)
+            
             for kk in np.arange(len(deltamu_min_global)):
                 if deltamu_max[kk] > deltamu_max_global[kk]:
                     deltamu_max_global[kk] = deltamu_max[kk]
                 if deltamu_min[kk] < deltamu_min_global[kk]:
                     deltamu_min_global[kk] = deltamu_min[kk]
+
             for kk in np.arange(np.shape(deltamu)[1]):
                 ii_counter += 1
+                w0 = parameters[1][kk]
+                wa = parameters[2][kk]
                 if ii_counter == thinning:
                     if ignore_k:
-                        plt.plot(redshifts, deltamu[:,kk])
+                        if is_phantom(chain_name, w0, wa, redshifts):
+                            plt.plot(redshifts, deltamu[:,kk], c='g')
+                            #pass
+                        else:
+                            plt.plot(redshifts, deltamu[:,kk], c='r')
+                            #pass
                     else:
-                        plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg)
+                        if is_phantom(chain_name, w0, wa, redshifts):
+                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c='g')
+                            #pass
+                        else:
+                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c='r')
+                            #pass
                     ii_counter = 0
-    if ignore_k:
-        plt.plot(redshifts, deltamu[:,0],label=label)
-    else:
+    if ignore_k==False:
         #plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
         #plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
         dashes = [20,5]
-        lmax,=plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=3,label=label)
+        lmax,=plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=3)
         lmin,=plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=3)
         lmax.set_dashes(dashes)
         lmin.set_dashes(dashes)
@@ -328,7 +368,9 @@ def plot_equation_of_state(wa_1,wa_2):
     #plt.text(7.5,-0.8,'Thawing\n    CPL',size='xx-large',color='b')
     #plt.text(6,-0.6,'Freezing\n  n7CPL',size='xx-large',color='g')
     plt.text(.4,-0.75,'Steep slope',size='x-large',color='b',rotation=50)
-    plt.text(2.8,-1.,'Gentle slope',size='x-large',color='g')
+    plt.text(.4,-1.1,'Steep slope',size='x-large',color='b',rotation=-50)
+    plt.text(2.8,-0.84,'Gentle slope',size='x-large',color='g',rotation=15)
+    plt.text(2.8,-1.12,'Gentle slope',size='x-large',color='g',rotation=-15)
     fig.set_tight_layout('True')
     plt.savefig('Figures/equationofstate.pdf',format='pdf')
 

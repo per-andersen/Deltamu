@@ -200,7 +200,7 @@ class Deltamu(object):
 
 		return parameters_min, parameters_max, deltamu_min, deltamu_max
 
-	def get_parameters(self):
+	def get_parameters(self, verbose=True):
 		'''Returns parameter sets on contour of given cosmology
 		'''
 		if self.chain_name == 'lcdm':
@@ -208,11 +208,15 @@ class Deltamu(object):
 		else:
 			Parameter_contour = Contour.Contour(self.chain_name,self.directory,self.contour_level,self.tolerance,self.bins_tuple,self.smoothing)
 
-		print "Does", self.chain_name ,"contour exist?",
+		
+		if verbose:
+			print "Does", self.chain_name ,"contour exist?",
 		if Parameter_contour.test_contour_exists():
-			print "Yes"
+			if verbose:
+				print "Yes"
 		else:
-			print "No"
+			if verbose:
+				print "No"
 			Parameter_contour.pickle_contour()
 
 		if self.chain_name == 'lcdm':
