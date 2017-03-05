@@ -362,15 +362,14 @@ def plot_equation_of_state(wa_1,wa_2):
         eos_cpl = wa_2[ii][0] + wa_2[ii][1]*((1.-scale_factor)**7)
         plt.plot(redshifts, eos_cpl,c='g',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_2[ii][0]) + r', $w_a$ : ' + str(wa_2[ii][1]))
     plt.ylim((-1.5,-0.5))
-    plt.legend(frameon=False, loc=5, fontsize=17)
+    plt.xlim((0,4))
+    plt.legend(frameon=False, loc=9, fontsize=17)
     plt.xticks(size='x-large')
     plt.yticks(size='x-large')
-    #plt.text(7.5,-0.8,'Thawing\n    CPL',size='xx-large',color='b')
-    #plt.text(6,-0.6,'Freezing\n  n7CPL',size='xx-large',color='g')
-    plt.text(.4,-0.75,'Steep slope',size='x-large',color='b',rotation=50)
-    plt.text(.4,-1.1,'Steep slope',size='x-large',color='b',rotation=-50)
-    plt.text(2.8,-0.84,'Gentle slope',size='x-large',color='g',rotation=15)
-    plt.text(2.8,-1.12,'Gentle slope',size='x-large',color='g',rotation=-15)
+    plt.text(.5,-0.82,'Convex',size='x-large',color='b',rotation=-14)
+    plt.text(.5,-1.18,'Concave',size='x-large',color='b',rotation=14)
+    plt.text(1.6,-0.95,'Convex',size='x-large',color='g',rotation=10)
+    plt.text(1.6,-1.06,'Concave',size='x-large',color='g',rotation=-8)
     fig.set_tight_layout('True')
     plt.savefig('Figures/equationofstate.pdf',format='pdf')
 
@@ -526,8 +525,8 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = False
-combined_plot()
+individual_plots = True
+#combined_plot()
 #additional_plots()
 
 
@@ -550,7 +549,7 @@ combined_plot()
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.7), (-1.,0.8), (-1.,.9)])
-#plot_equation_of_state([(-1.,0.5), (-1.,-0.5)],[(-1.,0.5), (-1.,-0.5)])
-#plt.show()
+plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
+plt.show()
 
 
