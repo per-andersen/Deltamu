@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.patheffects as patheffects
 from mpl_toolkits.mplot3d import axes3d
 import pickle as pick
 import Contour
@@ -86,6 +88,41 @@ def get_file_name(chain_name, bins_tuple, contour_level=0.68, tolerance=0.005, d
             "-" + str(redshift_marg_max) + "_n" + str(redshift_marg_n) + ".dat"
     return f_name
 
+def eos_from_chain_name(chain_name, w0, wa, redshifts):
+    scale_factor = 1. / (1. + redshifts)
+    if chain_name == 'cpl':
+        #print 'CPL'
+        return w0 + wa * (1. - scale_factor)
+    elif chain_name == 'jbp':
+        #print 'JBP'
+        return w0 + wa * (1. - scale_factor) * scale_factor
+    elif chain_name == 'n3cpl':
+        #print 'n3CPL'
+        return w0 + wa * (1. - scale_factor)**3
+    elif chain_name == 'n7cpl':
+        #print 'n7CPL'
+        return w0 + wa * (1. - scale_factor)**7
+    else:
+        print "STRANGER DANGER!"
+        exit()
+
+def is_phantom(chain_name, w0, wa, redshifts):
+    eos = eos_from_chain_name(chain_name, w0, wa, redshifts)
+    
+    if np.min(eos) < -1:
+        return True
+    else:
+        #print np.min(eos)
+        return False
+
+def get_color(shade):
+    if shade == 'green':
+        colors = ['g', 'forestgreen','lime']
+    elif shade == 'red':
+        colors = ['r', 'sienna','tomato']
+    return np.random.choice(colors,size=1)[0]
+
+    return 
 def plot_minmax_deltamu(fname, title, legend_string=None):
     #redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max = read_pickled_deltamu(fname)
     redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg, m_bestfit_lcdm_marg = read_pickled_deltamu(fname)
@@ -115,33 +152,6 @@ def plot_deltamu(fname, title, legend_string=None):
     plt.title(title)
     plt.show()
 
-def eos_from_chain_name(chain_name, w0, wa, redshifts):
-    scale_factor = 1. / (1. + redshifts)
-    if chain_name == 'cpl':
-        #print 'CPL'
-        return w0 + wa * (1. - scale_factor)
-    elif chain_name == 'jbp':
-        #print 'JBP'
-        return w0 + wa * (1. - scale_factor) * scale_factor
-    elif chain_name == 'n3cpl':
-        #print 'n3CPL'
-        return w0 + wa * (1. - scale_factor)**3
-    elif chain_name == 'n7cpl':
-        #print 'n7CPL'
-        return w0 + wa * (1. - scale_factor)**7
-    else:
-        print "STRANGER DANGER!"
-        exit()
-
-def is_phantom(chain_name, w0, wa, redshifts):
-    eos = eos_from_chain_name(chain_name, w0, wa, redshifts)
-    
-    if np.min(eos) < -1:
-        return True
-    else:
-        #print np.min(eos)
-        return False
-
 def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', thinning=10, ignore_k=False):
     if individual_plots:
         plt.figure()
@@ -153,6 +163,8 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
 
     deltamu_max_global = np.zeros(1000)
     deltamu_min_global = np.zeros(1000)
+
+    deltamu_nonphantom = np.zeros((1,1000))
 
     for ii in np.arange(len(bins)):
         for jj in np.arange(len(smoothings)):
@@ -171,32 +183,51 @@ def oplot_deltamus(chain_name, bins, smoothings, tolerance=0.005, label='CPL', t
                 ii_counter += 1
                 w0 = parameters[1][kk]
                 wa = parameters[2][kk]
+                
+                if is_phantom(chain_name, w0, wa, redshifts) == False:
+                    if ignore_k:
+                        deltamu_nonphantom = np.concatenate((deltamu_nonphantom,np.array([deltamu[:,kk]])))
+                    else:
+                        deltamu_nonphantom = np.concatenate((deltamu_nonphantom,np.array([deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg])))
+                
                 if ii_counter == thinning:
                     if ignore_k:
                         if is_phantom(chain_name, w0, wa, redshifts):
-                            plt.plot(redshifts, deltamu[:,kk], c='g')
+                            plt.plot(redshifts, deltamu[:,kk], c=get_color(shade='green'))
                             #pass
                         else:
-                            plt.plot(redshifts, deltamu[:,kk], c='r')
+                            plt.plot(redshifts, deltamu[:,kk], c=get_color(shade='red'))
                             #pass
                     else:
                         if is_phantom(chain_name, w0, wa, redshifts):
-                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c='g')
+                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c=get_color(shade='green'))
                             #pass
                         else:
-                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c='r')
+                            plt.plot(redshifts, deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg,c=get_color(shade='red'))
                             #pass
                     ii_counter = 0
+    
+    
+    deltamu_nonphantom_max = np.zeros(1000)
+    deltamu_nonphantom_min = np.zeros(1000)
+    for ii in np.arange(len(deltamu_nonphantom_max)):
+        deltamu_nonphantom_max[ii] = np.max(deltamu_nonphantom[:,ii])
+        deltamu_nonphantom_min[ii] = np.min(deltamu_nonphantom[:,ii])
+    
+
     if ignore_k==False:
-        #plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=4,label=label)
-        #plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=4)
-        dashes = [20,5]
+        dashes = [20,10]
         lmax,=plt.plot(redshifts, deltamu_max_global,'k',ls='--',lw=3)
         lmin,=plt.plot(redshifts, deltamu_min_global,'k',ls='--',lw=3)
         lmax.set_dashes(dashes)
         lmin.set_dashes(dashes)
 
-    #plt.legend(frameon=False)
+        dashes_nonphantom = [5,5]
+        llmax,=plt.plot(redshifts, deltamu_nonphantom_max,'r',ls='--',lw=3)
+        llmin,=plt.plot(redshifts, deltamu_nonphantom_min,'r',ls='--',lw=3)
+        llmax.set_dashes(dashes_nonphantom)
+        llmin.set_dashes(dashes_nonphantom)
+
     plt.text(7.5, 0.08, label,size='x-large')
 
 def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'):
@@ -229,8 +260,8 @@ def oplot_deltamu_test(chain_name,bins, smoothings, tolerance=0.005, label='CPL'
                     deltamu_max_global_test[kk] = deltamu_max_test[kk]
                 if deltamu_min_test[kk] < deltamu_min_global_test[kk]:
                     deltamu_min_global_test[kk] = deltamu_min_test[kk]
-    plt.fill_between(redshifts, deltamu_max_global,deltamu_min_global,color='b',label=label)
-    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='g',hatch='X',label=label + r", $w_0=-1, w_a=0$")
+    plt.fill_between(redshifts, deltamu_max_global,deltamu_min_global,color='darkgrey',label=label)
+    plt.fill_between(redshifts_test, deltamu_max_global_test,deltamu_min_global_test,color='lightgrey',hatch='X',label=label + r", $w_0=-1, w_a=0$",edgecolor='darkgrey')
     plt.legend(frameon=False)
     if individual_plots:
         plt.savefig('Figures/test.pdf',format='pdf',dpi=fig.dpi)
@@ -353,14 +384,18 @@ def plot_equation_of_state(wa_1,wa_2):
     scale_factor = 1. / (1. + redshifts)
     linestyles = ['-','--','-.',':']
     fig = plt.figure()
+    ax = fig.add_subplot(111)
     plt.xlabel('Redshift',size='x-large')
     plt.ylabel(r'$w(z)$',size='xx-large')
+    
     for ii in np.arange(len(wa_1)):
         eos_cpl = wa_1[ii][0] + wa_1[ii][1]*(1.-scale_factor)
         plt.plot(redshifts, eos_cpl,c='b',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_1[ii][0]) + r', $w_a$ : ' + str(wa_1[ii][1]))
+
     for ii in np.arange(len(wa_2)):
         eos_cpl = wa_2[ii][0] + wa_2[ii][1]*((1.-scale_factor)**7)
         plt.plot(redshifts, eos_cpl,c='g',ls=linestyles[ii],lw=3, label=r'$w_0$ : ' + str(wa_2[ii][0]) + r', $w_a$ : ' + str(wa_2[ii][1]))
+
     plt.ylim((-1.5,-0.5))
     plt.xlim((0,4))
     plt.legend(frameon=False, loc=9, fontsize=17)
@@ -370,6 +405,9 @@ def plot_equation_of_state(wa_1,wa_2):
     plt.text(.5,-1.18,'Concave',size='x-large',color='b',rotation=14)
     plt.text(1.6,-0.95,'Convex',size='x-large',color='g',rotation=10)
     plt.text(1.6,-1.06,'Concave',size='x-large',color='g',rotation=-8)
+    ax.add_patch(patches.Rectangle((0,-1.5),4.,0.5,color='grey',alpha=0.2))
+    txt = plt.text(1.2, -1.3,'Phantom regime',size='xx-large',color='darkgrey')
+    txt.set_path_effects([patheffects.withStroke(linewidth=0.5,foreground='k')])
     fig.set_tight_layout('True')
     plt.savefig('Figures/equationofstate.pdf',format='pdf')
 
@@ -393,7 +431,7 @@ def combined_plot():
     ax1[1].text(0.3,0.08,'(b)',size='x-large')
 
     plt.sca(ax2[0])
-    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=False,thinning=50)
+    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=False,thinning=60)
     ax2[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax2[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax2[0].set_xticks([0.])
@@ -401,7 +439,7 @@ def combined_plot():
     ax2[0].text(0.3,0.08,'(c)',size='x-large')
 
     plt.sca(ax2[1])
-    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=False,thinning=50)
+    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=False,thinning=60)
     ax2[1].set_yticks([0.])
     ax2[1].set_yticklabels([''])
     ax2[1].set_xticks([0.])
@@ -409,11 +447,17 @@ def combined_plot():
     ax2[1].text(0.3,0.08,'(d)',size='x-large')
 
     plt.sca(ax3[0])
-    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=False,thinning=50)
+    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=False,thinning=60)
     ax3[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax3[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax3[0].set_xlabel('Redshift',size='x-large')
     ax3[0].text(0.3,0.08,'(e)',size='x-large')
+    
+    ax3[0].add_patch(patches.Rectangle((1.,-0.068),0.5,0.015,color='g'))
+    ax3[0].text(1.6,-0.066,'Phantom',size='large')
+
+    ax3[0].add_patch(patches.Rectangle((1.,-0.093),0.5,0.015,color='r'))
+    ax3[0].text(1.6,-0.091,'Non-phantom',size='large')
 
 
     plt.sca(ax3[1])
@@ -525,8 +569,8 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = True
-#combined_plot()
+individual_plots = False
+combined_plot()
 #additional_plots()
 
 
@@ -549,7 +593,7 @@ individual_plots = True
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.7), (-1.,0.8), (-1.,.9)])
-plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
-plt.show()
+#plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
+#plt.show()
 
 
