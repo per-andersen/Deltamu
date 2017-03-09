@@ -398,7 +398,7 @@ def plot_equation_of_state(wa_1,wa_2):
 
     plt.ylim((-1.5,-0.5))
     plt.xlim((0,4))
-    plt.legend(frameon=False, loc=9, fontsize=17)
+    plt.legend(frameon=False, loc=9, fontsize=17,handlelength=2.3)
     plt.xticks(size='x-large')
     plt.yticks(size='x-large')
     plt.text(.5,-0.82,'Convex',size='x-large',color='b',rotation=-14)
@@ -569,8 +569,8 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = False
-combined_plot()
+individual_plots = True
+#combined_plot()
 #additional_plots()
 
 
@@ -593,7 +593,7 @@ combined_plot()
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.7), (-1.,0.8), (-1.,.9)])
-#plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
-#plt.show()
+plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
+plt.show()
 
 
