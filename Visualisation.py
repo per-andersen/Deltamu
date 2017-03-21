@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.patheffects as patheffects
+from matplotlib.font_manager import FontProperties
 from mpl_toolkits.mplot3d import axes3d
 import pickle as pick
 import Contour
@@ -530,13 +531,17 @@ def additional_plots():
 def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, tolerance=0.005):
     if individual_plots:
         fig = plt.figure()
+        ax = plt.subplot(1,1,1)
         plt.xlabel('Redshift',size='x-large')
         plt.ylabel(r'$\Delta \mu$',size='x-large')
 
     deltamu_max_global = np.zeros((len(chain_names),1000))
     deltamu_min_global = np.zeros((len(chain_names),1000))
 
+    deltamu_nonphantom = np.zeros((1,1000))
+
     colors = ['g', 'lawngreen', 'limegreen','b']
+    colors_nonphantom = ['orange','orange','orange','r']
     linestyles = ['-','--',':','-']
     for ll in np.arange(len(chain_names)):
         chain_name = chain_names[ll]
@@ -550,15 +555,60 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
                 deltamus = Deltamu.Deltamu(chain_name,'',do_marg=True,bins_tuple=bins[ii],smoothing=smoothings[jj],tolerance=tolerance)
                 fname = root_dir + deltamus.get_marg_file_name()
                 redshifts, deltamu_min, deltamu_max, parameters_min, parameters_max, deltamu, marg, m_bestfit_lcdm_marg = read_pickled_deltamu(fname)
+                parameters = deltamus.get_parameters(verbose=False)
+
                 for kk in np.arange(len(deltamu_min_global[ll])):
+                    w0 = parameters[1][kk]
+                    wa = parameters[2][kk]
+
+                    if is_phantom(chain_name, w0, wa, redshifts) == False:
+                        deltamu_nonphantom = np.concatenate((deltamu_nonphantom,np.array([deltamu[:,kk] + marg[kk] - m_bestfit_lcdm_marg])))
+
                     if deltamu_max[kk] > deltamu_max_global[ll][kk]:
                         deltamu_max_global[ll][kk] = deltamu_max[kk]
                     if deltamu_min[kk] < deltamu_min_global[ll][kk]:
                         deltamu_min_global[ll][kk] = deltamu_min[kk]
-        plt.plot(redshifts, deltamu_max_global[ll],lw=3,label=label, color=color,ls=linestyle)
-        plt.plot(redshifts, deltamu_min_global[ll],lw=3,color=color,ls=linestyle)
+        
+        deltamu_max_nonphantom = np.zeros(1000)
+        deltamu_min_nonphantom = np.zeros(1000)
+        for ii in np.arange(len(deltamu_max_nonphantom)):
+            deltamu_max_nonphantom[ii] = np.max(deltamu_nonphantom[:,ii])
+            deltamu_min_nonphantom[ii] = np.min(deltamu_nonphantom[:,ii])
 
-    plt.legend(frameon=False, loc=5, fontsize=20)
+        plt.plot(redshifts, deltamu_max_global[ll],lw=3,color=color,ls=linestyle,label=label)
+        plt.plot(redshifts, deltamu_min_global[ll],lw=3,color=color,ls=linestyle)
+        if chain_name == 'n7cpl' or chain_name == 'cpl':
+            plt.plot(redshifts, deltamu_max_nonphantom,lw=3,color=colors_nonphantom[ll],ls=linestyle,label=label)
+            plt.plot(redshifts, deltamu_min_nonphantom,lw=3,color=colors_nonphantom[ll],ls=linestyle)
+
+    handles, label_names = ax.get_legend_handles_labels()
+    handles.insert(6,plt.Line2D(redshifts,deltamu_min_nonphantom,linestyle='none',marker='None'))
+    label_names.insert(6,'')
+    
+    
+    handles_plot, labels_plot = ['','','','','','',''], ['']*7
+    handles_plot[0] = handles[0]
+    handles_plot[1] = handles[2]
+    handles_plot[2] = handles[3]
+    handles_plot[3] = handles[4]
+    handles_plot[4] = handles[1]
+    handles_plot[5] = handles[5]
+    handles_plot[6] = handles[6]
+    labels_plot[0] = label_names[0]
+    labels_plot[1] = label_names[2]
+    labels_plot[2] = label_names[3]
+    labels_plot[3] = label_names[4]
+    labels_plot[4] = label_names[1]
+    labels_plot[5] = label_names[5]
+    labels_plot[6] = label_names[6]
+    
+    font0 = FontProperties()
+    font0.set_size('xx-large')
+    font0.set_weight('bold')
+    plt.text(2.3,0.007,'Phantom',fontproperties=font0)
+    plt.text(6.3,0.007,'Non-phantom',fontproperties=font0)
+    ax.legend(handles_plot,labels_plot,frameon=False, fontsize=20, ncol=2, bbox_to_anchor=(0.95,0.55), columnspacing=4.)
+    #ax.legend(handles,label_names,frameon=False, loc=5, fontsize=20, ncol=2)
     plt.ylim((-0.06,0.06))
     plt.yticks([-0.06, -0.03, 0, 0.03, 0.06],size='x-large')
     plt.xticks(size='x-large')
@@ -574,9 +624,9 @@ individual_plots = True
 #additional_plots()
 
 
-#oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
-#[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
-#[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
+oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
+[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
+[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
 
 #plot_3d_contours('n7cpl', [(40,40,40)], 0.4)
 
@@ -593,7 +643,7 @@ individual_plots = True
 #oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
 
 #plot_equation_of_state([(-1.,0.1), (-1.,0.2), (-1.,0.3)],[(-1.,0.7), (-1.,0.8), (-1.,.9)])
-plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
-plt.show()
+#plot_equation_of_state([(-0.6,-0.4), (-1.4,0.4)],[(-1.,0.4), (-1.,-0.4)])
+#plt.show()
 
 
