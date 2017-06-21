@@ -414,14 +414,18 @@ def plot_equation_of_state(wa_1,wa_2):
 
 def combined_plot():
     f, (ax1, ax2, ax3) = plt.subplots(3,2,figsize=(8,10))
+
+    log_x_axis = False
     
     plt.sca(ax1[0])
-    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=True,thinning=30)
+    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=True,thinning=80)
     ax1[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax1[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax1[0].set_xticks([0.])
     ax1[0].set_xticklabels([''])
     ax1[0].text(0.3,0.08,'(a)',size='x-large')
+    if log_x_axis:
+        ax1[0].set_xscale("log", nonposx='clip')
     
     plt.sca(ax1[1])
     oplot_deltamu_test('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL')
@@ -430,25 +434,31 @@ def combined_plot():
     ax1[1].set_xticks([0.])
     ax1[1].set_xticklabels([''])
     ax1[1].text(0.3,0.08,'(b)',size='x-large')
+    if log_x_axis:
+        ax1[1].set_xscale("log", nonposx='clip')
 
     plt.sca(ax2[0])
-    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=False,thinning=60)
+    oplot_deltamus('cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='CPL',ignore_k=False,thinning=100)
     ax2[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax2[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax2[0].set_xticks([0.])
     ax2[0].set_xticklabels([''])
     ax2[0].text(0.3,0.08,'(c)',size='x-large')
+    if log_x_axis:
+        ax2[0].set_xscale("log", nonposx='clip')
 
     plt.sca(ax2[1])
-    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=False,thinning=60)
+    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=False,thinning=100)
     ax2[1].set_yticks([0.])
     ax2[1].set_yticklabels([''])
     ax2[1].set_xticks([0.])
     ax2[1].set_xticklabels([''])
     ax2[1].text(0.3,0.08,'(d)',size='x-large')
+    if log_x_axis:
+        ax2[1].set_xscale("log", nonposx='clip')
 
     plt.sca(ax3[0])
-    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=False,thinning=60)
+    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=False,thinning=100)
     ax3[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax3[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax3[0].set_xlabel('Redshift',size='x-large')
@@ -460,14 +470,19 @@ def combined_plot():
     ax3[0].add_patch(patches.Rectangle((1.,-0.093),0.5,0.015,color='r'))
     ax3[0].text(1.6,-0.091,'Non-phantom',size='large')
 
+    if log_x_axis:
+        ax3[0].set_xscale("log", nonposx='clip')
+
 
     plt.sca(ax3[1])
-    oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=False,thinning=50)
+    oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=False,thinning=90)
     ax3[1].set_xlabel('Redshift',size='x-large')
     ax3[1].set_yticks([0.])
     ax3[1].set_yticklabels([''])
     ax3[1].set_xticks([2,4,6,8,10])
     ax3[1].text(0.3,0.08,'(f)',size='x-large')
+    if log_x_axis:
+        ax3[1].set_xscale("log", nonposx='clip')
 
 
     plt.subplots_adjust(left=0.11,bottom=0.05,right=0.98,top=0.98,wspace=0., hspace=0.)
@@ -501,7 +516,7 @@ def additional_plots():
     ax2[0].text(0.3,0.08,'(c)',size='x-large')
 
     plt.sca(ax2[1])
-    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=True,thinning=30)
+    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=True,thinning=80)
     ax2[1].set_yticks([0.])
     ax2[1].set_yticklabels([''])
     ax2[1].set_xticks([0.])
@@ -509,7 +524,7 @@ def additional_plots():
     ax2[1].text(0.3,0.08,'(d)',size='x-large')
 
     plt.sca(ax3[0])
-    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=True,thinning=30)
+    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=True,thinning=80)
     ax3[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax3[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
     ax3[0].set_xlabel('Redshift',size='x-large')
@@ -517,7 +532,7 @@ def additional_plots():
 
 
     plt.sca(ax3[1])
-    oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=True,thinning=30)
+    oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=True,thinning=80)
     ax3[1].set_xlabel('Redshift',size='x-large')
     ax3[1].set_yticks([0.])
     ax3[1].set_yticklabels([''])
@@ -619,14 +634,14 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
-individual_plots = True
-#combined_plot()
-#additional_plots()
+individual_plots = False
+combined_plot()
+additional_plots()
 
 
-oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
-[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
-[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
+#oplot_deltamu_extrema(['cpl', 'jbp', 'n3cpl','n7cpl'],\
+#[[(30,30,30),(40,40,40),(50,50,50)], [(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40),(50,50,50)],[(30,30,30),(40,40,40)]],\
+#[[0.6],[0.6],[0.6],[0.4]], ['CPL','JBP','n3CPL','n7CPL'])
 
 #plot_3d_contours('n7cpl', [(40,40,40)], 0.4)
 
