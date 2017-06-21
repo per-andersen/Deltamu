@@ -498,38 +498,37 @@ def additional_plots():
     ax1[0].set_xticks([0.])
     ax1[0].set_xticklabels([''])
     ax1[0].text(0.3,0.08,'(a)',size='x-large')
-    
+
     plt.sca(ax1[1])
-    oplot_deltamu_test('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
+    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=True,thinning=80)
     ax1[1].set_yticks([0.])
     ax1[1].set_yticklabels([''])
     ax1[1].set_xticks([0.])
     ax1[1].set_xticklabels([''])
     ax1[1].text(0.3,0.08,'(b)',size='x-large')
-
+    
     plt.sca(ax2[0])
-    oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
-    ax2[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
+    oplot_deltamu_test('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL')
+    ax2[0].set_yticks([0.])
     ax2[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
-    ax2[0].set_xticks([0.])
     ax2[0].set_xticklabels([''])
     ax2[0].text(0.3,0.08,'(c)',size='x-large')
 
     plt.sca(ax2[1])
-    oplot_deltamus('jbp', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='JBP',ignore_k=True,thinning=80)
-    ax2[1].set_yticks([0.])
+    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=True,thinning=80)
+    ax2[1].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax2[1].set_yticklabels([''])
     ax2[1].set_xticks([0.])
-    ax2[1].set_xticklabels([''])
+    ax2[1].set_xlabel('Redshift',size='x-large')
     ax2[1].text(0.3,0.08,'(d)',size='x-large')
 
     plt.sca(ax3[0])
-    oplot_deltamus('n3cpl', [(30,30,30),(40,40,40),(50,50,50)],[0.6],label='n3CPL',ignore_k=True,thinning=80)
+    oplot_deltamu_test('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL')
     ax3[0].set_ylabel(r'$\mathbf{\Delta \mu}$',size='x-large')
     ax3[0].set_yticks([-0.08, -0.04, 0., 0.04, 0.08])
-    ax3[0].set_xlabel('Redshift',size='x-large')
+    ax3[0].set_xticks([0.])
+    ax3[0].set_xticklabels([''])
     ax3[0].text(0.3,0.08,'(e)',size='x-large')
-
 
     plt.sca(ax3[1])
     oplot_deltamus('n7cpl', [(30,30,30),(40,40,40)],[0.4],label='n7CPL',ignore_k=True,thinning=80)
@@ -635,7 +634,7 @@ def oplot_deltamu_extrema(chain_names, bins_list, smoothings_list, labels, toler
 root_dir = '/Users/perandersen/Data/HzSC/Deltamu/'
 
 individual_plots = False
-combined_plot()
+#combined_plot()
 additional_plots()
 
 
