@@ -1,3 +1,6 @@
+# Update 2026
+This repository is maintained to document the code used in the production of the paper "Discerning dark energy models with high redshift standard candles" (2017MNRAS.472.1413A). It has not been updated since, and should not be used as inspiration for further work as there are significant shortcomings in the structure of the project.
+
 # [Deltamu](https://github.com/per-andersen/Deltamu)
 The code to perform analysis of CosmoMC output chains. Final results is plot of deltamu values versus redshift for the cosmology given as input to CosmoMC. See below for the steps necessary to produce the final results. This code is released under the GNU general public license, version 3. In order to run the code the numpy, scipy, matplotlib, pickle, and astropy libraries must be installed. The easiest method of installation is to use pip, e.g. run "pip install numpy" for all the needed libraries. 
 
